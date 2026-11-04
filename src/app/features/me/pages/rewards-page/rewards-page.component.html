@@ -1,0 +1,43 @@
+<div class="mb-wrap page">
+  <app-me-tabs></app-me-tabs>
+  <div class="grid">
+    <section class="mb-card card" *ngIf="wallet.state$ | async as w">
+      <div class="mb-eyebrow">{{ 'rewards.level' | t }}</div>
+      <div class="lvl mb-title">{{ 'rewards.levelN' | t: { n: w.level } }}</div>
+      <app-progress-bar [value]="w.xp / need(w.level)"></app-progress-bar>
+      <p class="mb-muted">{{ 'rewards.levelNote' | t: { xp: w.xp, need: need(w.level) } }}</p>
+      <div class="cards">
+        <span><b>{{ w.gachaTickets }}</b>{{ 'rewards.tickets' | t }}</span>
+        <span><b>{{ w.hintCards }}</b>{{ 'rewards.hints' | t }}</span>
+        <span><b>{{ w.xrayCards }}</b>{{ 'rewards.xrays' | t }}</span>
+        <span><b>{{ w.swapTickets }}</b>{{ 'rewards.swapTickets' | t }}</span>
+      </div>
+    </section>
+    <section class="mb-card card" *ngIf="registry.isEnabled('boxes') && (daily.state$ | async) as s">
+      <div class="mb-eyebrow">{{ 'rewards.freeBox' | t }}</div>
+      <div class="free">
+        <app-box-art class="art" [box]="starter" size="sm"></app-box-art>
+        <div>
+          <h3 class="mb-title">{{ 'box.starter.name' | t }}</h3>
+          <p class="mb-muted">{{ 'rewards.freeBoxText' | t }}</p>
+          <button type="button" class="mb-btn" [disabled]="s.freeBoxClaimed" (click)="claimFree()">{{ (s.freeBoxClaimed ? 'rewards.tomorrow' : 'rewards.claimOpen') | t }}</button>
+        </div>
+      </div>
+    </section>
+    <a class="mb-card card wheel" *ngIf="registry.isEnabled('wheel')" routerLink="/wheel">
+      <div class="mb-eyebrow">{{ 'game.wheel.name' | t }}</div>
+      <h3 class="mb-title">{{ 'rewards.wheelTitle' | t }}</h3>
+      <p class="mb-muted">{{ 'rewards.wheelText' | t }}</p>
+      <span class="mb-btn mb-btn--sm">{{ 'rewards.spinNow' | t }}</span>
+    </a>
+    <section class="mb-card card">
+      <div class="mb-eyebrow">{{ 'rewards.promo' | t }}</div>
+      <form class="promo" [formGroup]="promo" (ngSubmit)="redeem()">
+        <input class="mb-input" formControlName="code" [placeholder]="'rewards.promoPlaceholder' | t" />
+        <button class="mb-btn" type="submit">{{ 'rewards.redeem' | t }}</button>
+      </form>
+    </section>
+  </div>
+  <app-check-in-section></app-check-in-section>
+  <app-missions-section></app-missions-section>
+</div>

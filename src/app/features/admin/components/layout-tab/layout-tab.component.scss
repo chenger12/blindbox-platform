@@ -1,0 +1,4 @@
+@use '../admin-tab' as *;
+.n { width: 18px; font-weight: 800; color: var(--admin-muted); font-size: 12px; }
+.nm { flex: 1; display: flex; flex-direction: column; b { font-size: 14px; } small { font-size: 11.5px; color: var(--admin-muted); } }
+.row.off { opacity: 1; background: var(--admin-bg); }

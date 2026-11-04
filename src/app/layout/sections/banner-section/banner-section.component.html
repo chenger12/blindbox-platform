@@ -1,0 +1,28 @@
+<ng-container *ngIf="showKuji; else boxHero">
+  <a class="kuji mb-card" routerLink="/kuji">
+    <div class="k-txt">
+      <div class="mb-eyebrow">{{ 'home.kujiEyebrow' | t }}</div>
+      <h2 class="mb-title">{{ 'home.kujiTitle' | t }}</h2>
+      <p class="mb-muted">{{ 'home.kujiSub' | t: { left: kuji.remaining(), total: tickets, a: kuji.tierLeft('A').left } }}</p>
+      <span class="mb-btn">{{ 'home.kujiCta' | t }}</span>
+    </div>
+    <app-prize-art class="k-art" itemId="jp_jin" gameId="kuji"></app-prize-art>
+  </a>
+</ng-container>
+<ng-template #boxHero>
+  <section class="hero mb-card">
+    <div class="h-l">
+      <div class="mb-eyebrow">{{ 'home.featured' | t }}</div>
+      <h1 class="mb-title">{{ 'box.' + featured.id + '.name' | t }}</h1>
+      <p class="mb-muted">{{ 'box.' + featured.id + '.desc' | t }}</p>
+      <div class="btns">
+        <a class="mb-btn mb-btn--lg" [routerLink]="['/boxes', featured.id]">{{ 'boxes.openFor' | t }} <app-coin></app-coin>{{ featured.price | coins }}</a>
+        <a class="mb-btn mb-btn--ghost mb-btn--lg" [routerLink]="['/boxes', featured.id]">{{ 'boxes.viewOdds' | t }}</a>
+      </div>
+      <div class="chase">
+        <app-item-tile *ngFor="let id of featured.topItemIds.slice(0, 3)" [itemId]="id" size="xs"></app-item-tile>
+      </div>
+    </div>
+    <app-box-art class="h-r" [box]="featured" size="xl"></app-box-art>
+  </section>
+</ng-template>

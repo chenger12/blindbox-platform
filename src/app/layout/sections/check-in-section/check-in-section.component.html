@@ -1,0 +1,15 @@
+<section class="ci mb-card" *ngIf="daily.state$ | async as s">
+  <div class="hd">
+    <div><div class="mb-eyebrow">{{ 'home.daily' | t }}</div><h3 class="mb-title">{{ 'home.checkIn' | t }}</h3></div>
+    <button type="button" class="mb-btn mb-btn--sm" [disabled]="daily.checkedInToday" (click)="claim()">
+      {{ (daily.checkedInToday ? 'home.checkedIn' : 'home.claim') | t }}
+    </button>
+  </div>
+  <div class="days">
+    <div class="d" *ngFor="let r of rewards; let i = index" [class.done]="i < s.checkInStreak" [class.big]="i === 6">
+      <small>{{ 'home.day' | t: { n: i + 1 } }}</small>
+      <app-coin></app-coin>
+      <b>{{ r }}</b>
+    </div>
+  </div>
+</section>

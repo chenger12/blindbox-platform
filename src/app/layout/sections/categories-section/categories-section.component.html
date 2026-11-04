@@ -1,0 +1,7 @@
+<app-section-header titleKey="home.categories"></app-section-header>
+<div class="cats">
+  <a class="cat mb-card" *ngFor="let c of cats" routerLink="/boxes" [queryParams]="{ cat: c.id }">
+    <app-prize-art class="art" [itemId]="c.item"></app-prize-art>
+    <span>{{ 'boxes.cat.' + c.id | t }}</span>
+  </a>
+</div>

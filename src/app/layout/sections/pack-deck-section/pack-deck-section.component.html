@@ -1,0 +1,13 @@
+<ng-container *ngIf="registry.isEnabled('boxes')">
+  <app-section-header titleKey="home.packDeck" eyebrowKey="home.packDeckEyebrow" linkKey="common.seeAll" link="/boxes"></app-section-header>
+  <div class="deck">
+    <a class="pack" *ngFor="let b of catalog.boxes.slice().reverse()" [routerLink]="['/boxes', b.id]">
+      <app-box-art [box]="b" size="lg"></app-box-art>
+      <div class="meta">
+        <b>{{ 'box.' + b.id + '.name' | t }}</b>
+        <span><app-coin></app-coin>{{ b.price | coins }}</span>
+      </div>
+      <i class="shine"></i>
+    </a>
+  </div>
+</ng-container>

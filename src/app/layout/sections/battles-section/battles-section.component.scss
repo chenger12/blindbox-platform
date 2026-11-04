@@ -1,0 +1,9 @@
+:host { display: block; }
+.list { display: flex; flex-direction: column; gap: 8px; }
+.row { display: flex; align-items: center; gap: 12px; padding: 10px 14px; text-decoration: none; color: inherit; }
+.mode { font: 800 15px/1 var(--font-display); min-width: 44px; }
+.boxes { display: flex; gap: 6px; flex: 1; min-width: 0; overflow: hidden; }
+.mini { width: 38px; flex: none; }
+.cost { display: inline-flex; gap: 4px; align-items: center; font-weight: 800; }
+.state { font-size: 11px; font-weight: 800; color: var(--color-text-secondary); }
+.state.live { color: var(--color-success); }

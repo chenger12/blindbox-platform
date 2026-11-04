@@ -1,0 +1,16 @@
+<div class="mb-dialog-body">
+  <h2 class="mb-title">{{ 'kuji.pickBox' | t }}</h2>
+  <div class="list">
+    <button type="button" class="it" *ngFor="let b of (kuji.state$ | async)?.boxes; let i = index" [class.on]="i === (kuji.state$ | async)?.current" (click)="choose(i)">
+      <span class="no">{{ b.no }}</span>
+      <span class="bi">
+        <b>{{ 'kuji.boxN' | t: { n: b.no } }}</b>
+        <span *ngIf="kuji.remaining(b); else sold">{{ 'kuji.left' | t: { n: kuji.remaining(b), total: total } }}</span>
+        <ng-template #sold><span class="sold">{{ 'kuji.soldOut' | t }}</span></ng-template>
+        <span class="hot" *ngIf="hot(b) as h">{{ h | t }}</span>
+        <small>A {{ kuji.tierLeft('A', b).left }} · B {{ kuji.tierLeft('B', b).left }} · C {{ kuji.tierLeft('C', b).left }}</small>
+        <app-progress-bar [value]="kuji.remaining(b) / total"></app-progress-bar>
+      </span>
+    </button>
+  </div>
+</div>

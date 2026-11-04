@@ -1,0 +1,22 @@
+<div class="tab" [formGroup]="form">
+  <section>
+    <h3>{{ 'admin.brand.title' | t }}</h3>
+    <div class="grid2">
+      <label>{{ 'admin.brand.name' | t }}<input formControlName="siteName" /></label>
+      <label>{{ 'admin.brand.lang' | t }}
+        <select formControlName="defaultLang"><option *ngFor="let l of i18n.languages" [value]="l.code">{{ l.label }}</option></select>
+      </label>
+      <label class="wide">{{ 'admin.brand.logo' | t }}<input formControlName="logoUrl" /></label>
+      <label class="wide">{{ 'admin.brand.favicon' | t }}<input formControlName="faviconUrl" /></label>
+    </div>
+    <div class="logo-prev"><img [src]="form.controls.logoUrl.value" alt="" /><b>{{ form.controls.siteName.value }}</b></div>
+  </section>
+  <section [formGroup]="form.controls.layout">
+    <h3>{{ 'admin.brand.footer' | t }}</h3>
+    <mat-slide-toggle formControlName="footerVisible">{{ 'admin.brand.showFooter' | t }}</mat-slide-toggle>
+  </section>
+  <section>
+    <h3>{{ 'admin.brand.api' | t }}</h3>
+    <p class="help">{{ 'admin.brand.apiHelp' | t }}</p>
+  </section>
+</div>

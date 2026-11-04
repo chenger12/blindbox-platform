@@ -1,0 +1,6 @@
+<div class="ticker" *ngIf="feed.drops$ | async as drops">
+  <span class="dot"></span>
+  <ng-container *ngIf="drops[0] as d">
+    <span class="msg">{{ 'ticker.pulled' | t: { user: (d.user | userName), item: (d.itemId | itemName) } }}</span>
+  </ng-container>
+</div>

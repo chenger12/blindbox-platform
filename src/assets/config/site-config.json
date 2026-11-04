@@ -1,0 +1,50 @@
+{
+  "siteName": "MENGBOX",
+  "logoUrl": "assets/brand/logo.svg",
+  "faviconUrl": "favicon.ico",
+  "defaultLang": "en",
+  "template": "modern",
+  "styleId": "arena",
+  "colors": {
+    "primary": "#8b5cff", "primaryHover": "#7a48ff", "secondary": "#00d4ff",
+    "background": "#0a0d1f", "surface": "#111634", "surface2": "#171e44",
+    "textPrimary": "#eef1ff", "textSecondary": "#7c86bf", "onPrimary": "#ffffff",
+    "border": "#252e63", "success": "#3ddc97", "warning": "#f5b400", "error": "#ff4d6d"
+  },
+  "button": {
+    "style": "rounded", "borderRadius": "10px", "fontWeight": "800", "textTransform": "uppercase",
+    "shadow": "0 0 22px #8b5cff55", "border": "0", "background": "linear-gradient(90deg,#8b5cff,#00d4ff)"
+  },
+  "typography": {
+    "display": "'Chakra Petch','Noto Sans JP','Inter',sans-serif",
+    "body": "'Inter','Noto Sans JP','Noto Sans SC',sans-serif",
+    "titleTransform": "uppercase", "titleWeight": "700"
+  },
+  "surface": {
+    "cardRadius": "14px", "cardBorder": "1px solid #252e63", "cardShadow": "none",
+    "tileBackground": "radial-gradient(circle at 50% 42%,#2e3480,#141a3f 75%)",
+    "backgroundImage": "radial-gradient(70% 40% at 0% 0%,#8b5cff2e,transparent 60%)"
+  },
+  "layout": {
+    "navPosition": "bottom",
+    "desktopNav": "top",
+    "sidebarWidth": "232px",
+    "topbarHeight": "60px",
+    "footerVisible": true,
+    "bannerPosition": "top",
+    "componentOrder": ["banner", "quickActions", "liveDrops", "boxes", "games", "battles", "topPulls"],
+    "navItems": ["home", "play", "battles", "market", "me"]
+  },
+  "games": [
+    { "id": "boxes", "enabled": true, "order": 1, "badge": "hot", "styleOverride": null },
+    { "id": "kuji", "enabled": true, "order": 2, "badge": "none", "styleOverride": null },
+    { "id": "gacha", "enabled": true, "order": 3, "badge": "none", "styleOverride": null },
+    { "id": "blindBox", "enabled": true, "order": 4, "badge": "new", "styleOverride": null },
+    { "id": "claw", "enabled": true, "order": 5, "badge": "none", "styleOverride": null },
+    { "id": "groupPull", "enabled": true, "order": 6, "badge": "none", "styleOverride": null },
+    { "id": "battles", "enabled": true, "order": 7, "badge": "none", "styleOverride": null },
+    { "id": "market", "enabled": true, "order": 8, "badge": "none", "styleOverride": null },
+    { "id": "swap", "enabled": true, "order": 9, "badge": "new", "styleOverride": null },
+    { "id": "wheel", "enabled": true, "order": 10, "badge": "free", "styleOverride": null }
+  ]
+}

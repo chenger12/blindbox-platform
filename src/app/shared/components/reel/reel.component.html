@@ -1,0 +1,8 @@
+<div class="reel" #view [attr.data-axis]="axis" [class.idle]="idle" [class.done]="done">
+  <div class="track" #track>
+    <div class="cell" *ngFor="let id of slots; let i = index" [class.win]="done && i === winIndex">
+      <app-item-tile [itemId]="id" size="xs" [showName]="false" [showRarity]="false"></app-item-tile>
+    </div>
+  </div>
+  <div class="mark"></div>
+</div>

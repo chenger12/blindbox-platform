@@ -1,0 +1,5 @@
+:host { display: block; margin-top: 12px; }
+.ticker { display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 12px; border-radius: 999px; background: var(--color-surface); border: var(--card-border); font-size: 12.5px; overflow: hidden; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-success); box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-success) 25%, transparent); flex: none; }
+.msg { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; animation: in .4s; }
+@keyframes in { from { transform: translateY(100%); opacity: 0; } }

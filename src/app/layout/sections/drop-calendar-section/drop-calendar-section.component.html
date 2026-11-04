@@ -1,0 +1,15 @@
+<app-section-header titleKey="home.drops" eyebrowKey="home.dropsEyebrow"></app-section-header>
+<div class="cal">
+  <a class="drop" *ngFor="let d of drops" [routerLink]="['/boxes', d.box.id]" [class.live]="d.at <= now">
+    <div class="when">
+      <b>{{ time(d.at) }}</b>
+      <small>{{ d.at <= now ? ('home.liveNow' | t) : countdown(d.at) }}</small>
+    </div>
+    <app-box-art class="art" [box]="d.box" size="sm"></app-box-art>
+    <div class="info">
+      <b class="mb-title">{{ 'box.' + d.box.id + '.name' | t }}</b>
+      <span>{{ 'boxes.upTo' | t }} <app-coin></app-coin>{{ d.box.maxValue | coins }}</span>
+    </div>
+    <span class="mb-btn mb-btn--sm" [class.mb-btn--ghost]="d.at > now">{{ (d.at <= now ? 'common.open' : 'home.notify') | t }}</span>
+  </a>
+</div>

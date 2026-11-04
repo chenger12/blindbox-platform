@@ -1,0 +1,5 @@
+<div class="bxa" [attr.data-size]="size" [mbVars]="{ '--c1': box.colorA, '--c2': box.colorB }">
+  <div class="glow"></div>
+  <div class="brand">{{ 'box.' + box.id + '.name' | t }}</div>
+  <app-prize-art *ngFor="let id of box.topItemIds.slice(0, 3); let i = index" class="fan" [attr.data-i]="i" [itemId]="id"></app-prize-art>
+</div>

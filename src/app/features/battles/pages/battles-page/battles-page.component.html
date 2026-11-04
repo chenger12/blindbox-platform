@@ -1,0 +1,40 @@
+<app-game-frame gameId="battles" [wide]="true">
+  <ng-container *ngIf="!running; else runTpl">
+    <div class="head">
+      <p class="mb-muted">{{ 'battles.intro' | t }}</p>
+      <button type="button" class="mb-btn" (click)="create()">+ {{ 'battles.create' | t }}</button>
+    </div>
+    <div class="list">
+      <div class="row mb-card" *ngFor="let b of battles.list$ | async">
+        <div class="mode"><b>{{ battles.mode(b.players) }}</b><small [class.live]="b.live">● {{ (b.live ? 'battles.live' : 'battles.waiting') | t }}</small></div>
+        <div class="boxes"><app-box-art *ngFor="let id of b.rounds" class="mini" [box]="box(id)" size="xs"></app-box-art></div>
+        <div class="info"><b><app-coin></app-coin>{{ battles.cost(b) | coins }}</b><span>{{ 'battles.roundsN' | t: { n: b.rounds.length } }}</span></div>
+        <div class="pl"><app-avatar *ngFor="let p of b.joined" [seed]="p"></app-avatar><i *ngFor="let e of empties(b)">+</i></div>
+        <div class="act">
+          <button *ngIf="b.live; else joinBtn" type="button" class="mb-btn mb-btn--ghost mb-btn--sm" (click)="watch(b)">{{ 'battles.watch' | t }}</button>
+          <ng-template #joinBtn><button type="button" class="mb-btn mb-btn--sm" (click)="join(b)">{{ 'battles.join' | t }}</button></ng-template>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-template #runTpl>
+    <button type="button" class="back" (click)="back()">← {{ 'battles.all' | t }}</button>
+    <div class="bt-head mb-card">
+      <b class="mode2">{{ battles.mode(running!.players) }}</b>
+      <div class="rounds"><app-box-art *ngFor="let id of running!.rounds; let i = index" class="mini" [class.cur]="i === round" [class.done]="i < round" [box]="box(id)" size="xs"></app-box-art></div>
+      <div class="pot"><small>{{ 'battles.pot' | t }}</small><b><app-coin></app-coin>{{ pot | coins }}</b></div>
+    </div>
+    <div class="status mb-title">{{ countText || (statusKey | t: statusParams) }}<span *ngIf="roundBox && !finished"> · {{ 'box.' + roundBox.id + '.name' | t }}</span></div>
+    <div class="cols" [attr.data-n]="players.length">
+      <div class="col mb-card" *ngFor="let p of players; let i = index" [attr.data-state]="p.state">
+        <div class="ph"><app-avatar [seed]="p.name ?? 'wait'"></app-avatar><span>{{ p.name ? (p.name | userName) : ('battles.openSeat' | t) }}</span><em *ngIf="p.state === 'win'">{{ 'battles.winner' | t }}</em></div>
+        <div class="tot"><app-coin></app-coin><b>{{ p.total | coins }}</b></div>
+        <app-reel *ngIf="roundBox && !finished; else idleTpl" [box]="roundBox" [winner]="winners[i]" axis="v"></app-reel>
+        <ng-template #idleTpl><div class="wait">{{ (finished ? 'battles.done' : 'battles.ready') | t }}</div></ng-template>
+        <div class="won"><app-item-tile *ngFor="let id of p.items" [itemId]="id" size="xs" [showName]="false"></app-item-tile></div>
+      </div>
+    </div>
+    <div class="end" *ngIf="finished"><button type="button" class="mb-btn" (click)="back()">{{ 'battles.back' | t }}</button></div>
+  </ng-template>
+</app-game-frame>

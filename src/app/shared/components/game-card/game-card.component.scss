@@ -1,0 +1,18 @@
+:host { display: block; min-width: 0; }
+.gc {
+  position: relative; display: flex; flex-direction: column; gap: 8px; height: 100%; padding: 16px;
+  border-radius: var(--card-radius); background: var(--color-surface); border: var(--card-border); box-shadow: var(--card-shadow);
+  color: var(--color-text-primary); text-decoration: none; overflow: hidden; transition: transform .15s;
+}
+.gc::before { content: ''; position: absolute; inset: auto -30% 55% auto; width: 140px; height: 140px; border-radius: 50%; background: var(--gc); opacity: .16; filter: blur(10px); }
+.gc:hover { transform: translateY(-3px); }
+.mb-badge { position: absolute; top: 12px; right: 12px; }
+.ic { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; color: var(--gc); background: color-mix(in srgb, var(--gc) 16%, transparent); }
+.ic ::ng-deep svg { width: 28px; height: 28px; }
+.nm { font: var(--title-weight) 16px/1.2 var(--font-display); text-transform: var(--title-transform); }
+.ds { font-size: 12.5px; line-height: 1.45; color: var(--color-text-secondary); flex: 1; }
+.go { align-self: flex-start; }
+.gc[data-variant='tile'] { align-items: center; text-align: center; padding: 14px 8px; gap: 6px;
+  .ic { width: 52px; height: 52px; border-radius: 16px; } .nm { font-size: 12.5px; } .mb-badge { top: 6px; right: 6px; } }
+.gc[data-variant='chip'] { flex-direction: row; align-items: center; padding: 8px 12px; gap: 8px;
+  .ic { width: 28px; height: 28px; border-radius: 8px; } .ic ::ng-deep svg { width: 18px; height: 18px; } .nm { font-size: 13px; } .mb-badge { display: none; } }

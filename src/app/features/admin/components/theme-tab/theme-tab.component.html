@@ -1,0 +1,91 @@
+<div class="tab" [formGroup]="form">
+  <section>
+    <h3>{{ 'admin.theme.presets' | t }}</h3>
+    <p class="help">{{ 'admin.theme.presetsHelp' | t }}</p>
+    <div class="region" *ngFor="let r of regions">
+      <h4>{{ 'region.' + r | t }}</h4>
+      <div class="presets">
+        <button type="button" class="preset" *ngFor="let p of presets(r)" [class.on]="form.controls.styleId.value === p.id" (click)="apply(p)" [mbVars]="vars(p)">
+          <div class="mock">
+            <div class="m-top"><i></i><span>Aa</span></div>
+            <div class="m-card"><div class="m-tile"></div><div class="m-lines"><i></i><i></i></div></div>
+            <div class="m-btn">{{ 'common.open' | t }}</div>
+          </div>
+          <b>{{ p.nameKey | t }}</b>
+          <small>{{ p.descKey | t }}</small>
+          <em>{{ 'template.' + p.template | t }}</em>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h3>{{ 'admin.theme.template' | t }}</h3>
+    <mat-button-toggle-group formControlName="template" hideSingleSelectionIndicator>
+      <mat-button-toggle value="modern">{{ 'template.modern' | t }}</mat-button-toggle>
+      <mat-button-toggle value="classic">{{ 'template.classic' | t }}</mat-button-toggle>
+      <mat-button-toggle value="customise">{{ 'template.customise' | t }}</mat-button-toggle>
+    </mat-button-toggle-group>
+    <p class="help">{{ 'template.' + form.controls.template.value + 'Help' | t }}</p>
+  </section>
+
+  <section formGroupName="colors">
+    <h3>{{ 'admin.theme.colors' | t }}</h3>
+    <div class="colors">
+      <label class="color" *ngFor="let k of colorKeys">
+        <input type="color" [formControlName]="k" />
+        <span><b>{{ 'admin.color.' + k | t }}</b><input class="hex" [formControlName]="k" /></span>
+      </label>
+    </div>
+  </section>
+
+  <section formGroupName="button">
+    <h3>{{ 'admin.theme.buttons' | t }}</h3>
+    <mat-button-toggle-group [value]="form.controls.button.controls.style.value" (change)="setButtonStyle($event.value)" hideSingleSelectionIndicator>
+      <mat-button-toggle value="square">{{ 'admin.btn.square' | t }}</mat-button-toggle>
+      <mat-button-toggle value="rounded">{{ 'admin.btn.rounded' | t }}</mat-button-toggle>
+      <mat-button-toggle value="pill">{{ 'admin.btn.pill' | t }}</mat-button-toggle>
+    </mat-button-toggle-group>
+    <div class="grid2">
+      <label>{{ 'admin.btn.radius' | t }}<input formControlName="borderRadius" /></label>
+      <label>{{ 'admin.btn.weight' | t }}
+        <select formControlName="fontWeight"><option *ngFor="let w of ['500', '600', '700', '800', '900']" [value]="w">{{ w }}</option></select>
+      </label>
+      <label>{{ 'admin.btn.case' | t }}
+        <select formControlName="textTransform"><option value="none">{{ 'admin.btn.caseNone' | t }}</option><option value="uppercase">{{ 'admin.btn.caseUpper' | t }}</option></select>
+      </label>
+      <label>{{ 'admin.btn.border' | t }}<input formControlName="border" /></label>
+      <label class="wide">{{ 'admin.btn.background' | t }}<input formControlName="background" /></label>
+      <label class="wide">{{ 'admin.btn.shadow' | t }}<input formControlName="shadow" /></label>
+    </div>
+  </section>
+
+  <section formGroupName="typography">
+    <h3>{{ 'admin.theme.type' | t }}</h3>
+    <div class="grid2">
+      <label>{{ 'admin.type.display' | t }}
+        <select formControlName="display"><option *ngFor="let f of fonts" [value]="f">{{ fontLabel(f) }}</option></select>
+      </label>
+      <label>{{ 'admin.type.body' | t }}
+        <select formControlName="body"><option *ngFor="let f of fonts" [value]="f">{{ fontLabel(f) }}</option></select>
+      </label>
+      <label>{{ 'admin.type.titleCase' | t }}
+        <select formControlName="titleTransform"><option value="none">{{ 'admin.btn.caseNone' | t }}</option><option value="uppercase">{{ 'admin.btn.caseUpper' | t }}</option></select>
+      </label>
+      <label>{{ 'admin.type.titleWeight' | t }}
+        <select formControlName="titleWeight"><option *ngFor="let w of ['400', '600', '700', '800', '900']" [value]="w">{{ w }}</option></select>
+      </label>
+    </div>
+  </section>
+
+  <section formGroupName="surface">
+    <h3>{{ 'admin.theme.surface' | t }}</h3>
+    <div class="grid2">
+      <label>{{ 'admin.surface.radius' | t }}<input formControlName="cardRadius" /></label>
+      <label>{{ 'admin.surface.border' | t }}<input formControlName="cardBorder" /></label>
+      <label class="wide">{{ 'admin.surface.shadow' | t }}<input formControlName="cardShadow" /></label>
+      <label class="wide">{{ 'admin.surface.tile' | t }}<input formControlName="tileBackground" /></label>
+      <label class="wide">{{ 'admin.surface.bg' | t }}<input formControlName="backgroundImage" /></label>
+    </div>
+  </section>
+</div>

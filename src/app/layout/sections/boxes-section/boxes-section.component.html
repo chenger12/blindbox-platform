@@ -1,0 +1,6 @@
+<ng-container *ngIf="registry.isEnabled('boxes')">
+  <app-section-header titleKey="home.boxes" linkKey="common.seeAll" link="/boxes"></app-section-header>
+  <div class="mb-grid-boxes">
+    <app-box-card *ngFor="let b of catalog.boxes" [box]="b"></app-box-card>
+  </div>
+</ng-container>

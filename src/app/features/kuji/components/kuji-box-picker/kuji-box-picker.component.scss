@@ -1,0 +1,7 @@
+.list { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.it { display: flex; gap: 12px; align-items: center; padding: 10px; border-radius: var(--card-radius); border: 1.5px solid var(--color-border); background: var(--color-surface-2); text-align: left; cursor: pointer; }
+.it.on { border-color: var(--color-primary); }
+.no { width: 46px; height: 46px; flex: none; border-radius: 12px; display: grid; place-items: center; background: var(--btn-bg); color: var(--color-on-primary); font: 900 20px var(--font-display); }
+.bi { flex: 1; display: flex; flex-direction: column; gap: 3px; font-size: 13px; small { font-size: 11px; color: var(--color-text-secondary); } }
+.hot { color: var(--color-error); font-weight: 800; font-size: 11.5px; }
+.sold { color: var(--color-text-secondary); }

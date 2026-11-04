@@ -1,0 +1,6 @@
+:host { display: block; }
+.bar { display: flex; gap: 8px; }
+.q { flex: 1; }
+.s { width: 180px; }
+.cats { margin: 12px 0 16px; }
+@media (max-width: 560px) { .s { width: 130px; } }

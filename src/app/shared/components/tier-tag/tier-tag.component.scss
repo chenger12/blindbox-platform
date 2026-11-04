@@ -1,0 +1,11 @@
+:host { display: inline-flex; }
+.tag {
+  display: inline-flex; align-items: center; justify-content: center; min-width: 20px; height: 20px; padding: 0 7px;
+  border-radius: 6px; font: 800 11px/1 var(--font-display); letter-spacing: .02em; white-space: nowrap;
+  background: var(--tier-n); color: var(--tier-ink);
+}
+.tag[data-tier='A'], .tag[data-tier='SR'] { background: var(--tier-gold); color: var(--tier-ink-dark); }
+.tag[data-tier='B'], .tag[data-tier='R'] { background: var(--tier-blue); color: #fff; }
+.tag[data-tier='C'] { background: var(--tier-green); color: var(--tier-ink-dark); }
+.tag[data-tier='D'] { background: var(--tier-pink); color: #fff; }
+.tag[data-tier='LAST'], .tag[data-tier='SECRET'] { background: var(--tier-holo); color: var(--tier-ink-dark); }

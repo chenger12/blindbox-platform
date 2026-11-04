@@ -1,0 +1,42 @@
+<app-game-frame gameId="groupPull">
+  <ng-container *ngIf="!arena; else arenaTpl">
+    <div class="room mb-card" *ngFor="let r of rooms">
+      <div class="ri">
+        <h4 class="mb-title">{{ 'groupPull.roomN' | t: { n: r.size } }}</h4>
+        <div class="seats-s">
+          <app-avatar *ngFor="let b of r.bots" [seed]="b"></app-avatar>
+          <i *ngFor="let e of empties(r)">+</i>
+        </div>
+        <small>{{ 'groupPull.roomInfo' | t: { f: r.bots.length, n: r.size, p: price } }}</small>
+      </div>
+      <div class="bonus"><app-prize-art [itemId]="bonus" gameId="groupPull"></app-prize-art>{{ 'groupPull.winnerBonus' | t }}</div>
+      <button type="button" class="mb-btn" (click)="join(r)">{{ 'groupPull.join' | t }}</button>
+    </div>
+    <div class="lose mb-card" *ngIf="gp.loseStreak$ | async as n; else lose0">
+      <span>{{ 'groupPull.loseInfo' | t: { n: 3 - n } }}</span>
+      <app-progress-bar [value]="n / 3"></app-progress-bar>
+    </div>
+    <ng-template #lose0><div class="lose mb-card"><span>{{ 'groupPull.loseInfo' | t: { n: 3 } }}</span><app-progress-bar [value]="0"></app-progress-bar></div></ng-template>
+  </ng-container>
+
+  <ng-template #arenaTpl>
+    <div class="arena">
+      <div class="status mb-title">{{ statusKey | t: statusParams }}</div>
+      <div class="seats">
+        <div class="seat mb-card" *ngFor="let s of seats" [class.empty]="!s.name" [class.me]="s.me" [attr.data-state]="s.state">
+          <div class="crown">{{ 'groupPull.top' | t }}</div>
+          <app-avatar class="av" [seed]="s.name ?? 'empty'"></app-avatar>
+          <div class="nm">{{ s.name ? (s.name | userName) : ('groupPull.waitingSeat' | t) }}</div>
+          <div class="slots">
+            <div class="slot" *ngFor="let e of s.items" [class.on]="e" [class.rare]="rare(e)">
+              <ng-container *ngIf="e; else q"><app-prize-art [itemId]="e.itemId" gameId="groupPull"></app-prize-art><span class="v">{{ value(e) }}</span></ng-container>
+              <ng-template #q>?</ng-template>
+            </div>
+          </div>
+          <div class="tot">{{ 'groupPull.value' | t }} <b>{{ s.total }}</b></div>
+        </div>
+      </div>
+      <div class="cd" *ngIf="countdown"><span>{{ countdown }}</span></div>
+    </div>
+  </ng-template>
+</app-game-frame>

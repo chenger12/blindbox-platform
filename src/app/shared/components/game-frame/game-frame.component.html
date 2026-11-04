@@ -1,0 +1,23 @@
+<section class="frame" [class.wide]="wide">
+  <header class="head">
+    <a class="back" routerLink="/">← {{ 'common.home' | t }}</a>
+    <div class="ttl">
+      <div class="mb-eyebrow">{{ 'common.game' | t }}</div>
+      <h1 class="mb-title">{{ meta.nameKey | t }}</h1>
+    </div>
+    <button type="button" class="mb-btn mb-btn--ghost mb-btn--sm" (click)="showHow = !showHow">{{ 'common.howToPlay' | t }}</button>
+  </header>
+  <div class="how mb-card" *ngIf="showHow">
+    <p>{{ meta.descKey | t }}</p>
+    <ol><li *ngFor="let k of meta.howKeys">{{ k | t }}</li></ol>
+  </div>
+  <ng-content></ng-content>
+  <div class="others">
+    <div class="mb-eyebrow">{{ 'common.otherGames' | t }}</div>
+    <div class="chips">
+      <ng-container *ngFor="let g of registry.enabled$ | async">
+        <app-game-card *ngIf="g.id !== gameId" [game]="g" variant="chip"></app-game-card>
+      </ng-container>
+    </div>
+  </div>
+</section>

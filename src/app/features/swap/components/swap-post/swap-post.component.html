@@ -1,0 +1,41 @@
+<article class="post mb-card" [class.mine]="post.mine" [class.done]="post.status !== 'open'">
+  <header class="ph">
+    <app-avatar [seed]="post.author"></app-avatar>
+    <div class="who"><b>{{ post.author | userName }}</b><small>{{ post.createdAt | ago }} · {{ lifeKey.key | t: lifeKey.params ?? null }}</small></div>
+    <span class="me-tag" *ngIf="post.mine">{{ 'swap.myListing' | t }}</span>
+    <button *ngIf="!post.mine" type="button" class="blk" (click)="action.emit({ type: 'block', post })">{{ 'swap.block' | t }}</button>
+  </header>
+  <p class="tx">{{ post.note ?? (post.noteKey ?? '' | t) }}</p>
+  <div class="lbl">{{ 'swap.have' | t }}</div>
+  <div class="give">
+    <app-item-tile *ngFor="let id of post.give" [itemId]="id" size="sm"></app-item-tile>
+    <p class="mb-muted" *ngIf="!post.give.length">{{ 'swap.allTraded' | t }}</p>
+  </div>
+  <div class="lbl">{{ 'swap.want' | t }}</div>
+  <div class="want">
+    <em *ngFor="let id of post.want">{{ id | itemName }}</em>
+    <em *ngIf="!post.want.length">{{ 'swap.openToOffers' | t }}</em>
+  </div>
+  <div class="my" *ngIf="post.myOffer as m" [attr.data-status]="m.status">
+    {{ 'swap.myOffer' | t: { want: (m.want | itemName) } }} · <b>{{ 'swap.status.' + m.status | t }}</b>
+  </div>
+  <ng-container *ngIf="post.mine && post.offers.length">
+    <div class="lbl">{{ 'swap.offers' | t }}</div>
+    <div class="offer" *ngFor="let o of post.offers; let i = index">
+      <div class="ot"><app-avatar [seed]="o.from"></app-avatar><span><b>{{ o.from }}</b> {{ 'swap.wantsYour' | t: { item: (o.targetItemId | itemName) } }}</span><small>{{ o.createdAt | ago }}</small></div>
+      <div class="oi">
+        <app-item-tile [itemId]="o.itemId" size="xs"></app-item-tile><span class="sw">⇄</span><app-item-tile [itemId]="o.targetItemId" size="xs"></app-item-tile>
+      </div>
+      <div class="oa" *ngIf="o.status === 'pending'; else st">
+        <button type="button" class="mb-btn mb-btn--ghost mb-btn--sm" (click)="action.emit({ type: 'decline', post, index: i })">{{ 'swap.decline' | t }}</button>
+        <button type="button" class="mb-btn mb-btn--sm" (click)="action.emit({ type: 'accept', post, index: i })">{{ 'swap.accept' | t }}</button>
+      </div>
+      <ng-template #st><div class="st" [attr.data-status]="o.status">{{ 'swap.offerStatus.' + o.status | t }}</div></ng-template>
+    </div>
+  </ng-container>
+  <footer class="pf">
+    <span><b>{{ post.interested }}</b> {{ 'swap.interested' | t }}</span>
+    <button *ngIf="post.mine; else offerBtn" type="button" class="mb-btn mb-btn--ghost mb-btn--sm" [disabled]="post.status !== 'open'" (click)="action.emit({ type: 'unlist', post })">{{ 'swap.unlist' | t }}</button>
+    <ng-template #offerBtn><button type="button" class="mb-btn mb-btn--sm" [disabled]="offerDisabled" (click)="action.emit({ type: 'offer', post })">{{ offerLabel | t }}</button></ng-template>
+  </footer>
+</article>

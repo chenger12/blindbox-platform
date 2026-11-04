@@ -1,0 +1,37 @@
+<app-game-frame gameId="market" [wide]="true">
+  <div class="mb-seg hub" *ngIf="registry.isEnabled('swap')">
+    <button type="button" class="on">{{ 'market.buySell' | t }}</button>
+    <a routerLink="/swap"><button type="button" tabindex="-1">{{ 'game.swap.name' | t }}</button></a>
+  </div>
+  <ng-container *ngIf="view$ | async as v">
+    <div class="head">
+      <p class="mb-muted">{{ 'market.intro' | t }}</p>
+      <button type="button" class="mb-btn" (click)="sell()">+ {{ 'market.sellItem' | t }}</button>
+    </div>
+    <div class="recent mb-card">
+      <span class="mb-eyebrow">{{ 'market.recent' | t }}</span>
+      <div class="rs" *ngFor="let s of v.sales"><app-prize-art class="m" [itemId]="s.itemId"></app-prize-art><span><app-coin></app-coin>{{ s.price | coins }}</span></div>
+    </div>
+    <form class="tools" [formGroup]="form">
+      <div class="mb-chips">
+        <button type="button" *ngFor="let r of rarities" class="mb-chip" [class.on]="form.controls.rarity.value === r" (click)="form.controls.rarity.setValue(r)">{{ (r === 'all' ? 'common.all' : 'rarity.' + r) | t }}</button>
+      </div>
+      <select class="mb-select sort" formControlName="sort">
+        <option value="new">{{ 'market.sortNew' | t }}</option>
+        <option value="low">{{ 'market.sortLow' | t }}</option>
+        <option value="high">{{ 'market.sortHigh' | t }}</option>
+      </select>
+    </form>
+    <div class="mb-grid-items" *ngIf="v.listings.length; else none">
+      <app-item-tile *ngFor="let l of v.listings" [itemId]="l.itemId">
+        <div class="lf">
+          <div class="seller"><app-avatar [seed]="l.seller"></app-avatar><span>{{ l.seller | userName }} · {{ l.createdAt | ago }}</span></div>
+          <div class="price"><span><app-coin></app-coin>{{ l.price | coins }}</span><small [class.up]="delta(l) > 0">{{ delta(l) > 0 ? '+' : '' }}{{ delta(l) }}%</small></div>
+          <button *ngIf="l.mine; else buyBtn" type="button" class="mb-btn mb-btn--ghost mb-btn--sm mb-btn--block" (click)="market.unlist(l.id)">{{ 'market.unlist' | t }}</button>
+          <ng-template #buyBtn><button type="button" class="mb-btn mb-btn--sm mb-btn--block" (click)="buy(l)">{{ 'market.buy' | t }}</button></ng-template>
+        </div>
+      </app-item-tile>
+    </div>
+    <ng-template #none><app-empty-state titleKey="market.noneTitle"></app-empty-state></ng-template>
+  </ng-container>
+</app-game-frame>

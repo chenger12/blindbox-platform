@@ -1,0 +1,21 @@
+<div class="mb-dialog-body">
+  <h2 class="mb-title">{{ 'battles.create' | t }}</h2>
+  <form [formGroup]="form" (ngSubmit)="submit()">
+    <label class="mb-label">{{ 'battles.players' | t }}</label>
+    <div class="mb-chips">
+      <button type="button" *ngFor="let n of [2, 3, 4]" class="mb-chip" [class.on]="form.controls.players.value === n" (click)="form.controls.players.setValue(n)">{{ battles.mode(n) }}</button>
+    </div>
+    <label class="mb-label">{{ 'battles.rounds' | t: { n: form.controls.rounds.value.length } }}</label>
+    <div class="sel">
+      <button type="button" class="mini" *ngFor="let id of form.controls.rounds.value; let i = index" (click)="remove(i)"><app-box-art [box]="catalog.box(id)!" size="xs"></app-box-art><span>×</span></button>
+      <span class="mb-muted" *ngIf="!form.controls.rounds.value.length">{{ 'battles.noBoxes' | t }}</span>
+    </div>
+    <div class="pick">
+      <button type="button" class="pb" *ngFor="let b of catalog.boxes" (click)="add(b.id)">
+        <app-box-art [box]="b" size="xs"></app-box-art><b>{{ 'box.' + b.id + '.name' | t }}</b><small><app-coin></app-coin>{{ b.price }}</small>
+      </button>
+    </div>
+    <div class="total"><span>{{ 'battles.costPer' | t }}</span><b><app-coin></app-coin>{{ cost | coins }}</b></div>
+    <button class="mb-btn mb-btn--lg mb-btn--block" type="submit" [disabled]="!form.controls.rounds.value.length">{{ 'battles.createJoin' | t }}</button>
+  </form>
+</div>

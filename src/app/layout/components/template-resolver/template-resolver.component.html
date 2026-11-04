@@ -1,0 +1,7 @@
+<ng-container *ngIf="theme.config$ | async as c">
+  <ng-container [ngSwitch]="c.template">
+    <app-classic-layout *ngSwitchCase="'classic'" [order]="c.layout.componentOrder"></app-classic-layout>
+    <app-customise-layout *ngSwitchCase="'customise'" [order]="c.layout.componentOrder"></app-customise-layout>
+    <app-modern-layout *ngSwitchDefault [order]="c.layout.componentOrder"></app-modern-layout>
+  </ng-container>
+</ng-container>

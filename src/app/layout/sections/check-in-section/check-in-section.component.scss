@@ -1,0 +1,9 @@
+:host { display: block; margin-top: 16px; }
+.ci { padding: 16px; }
+.hd { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 12px; h3 { font-size: 18px; margin-top: 2px; } }
+.days { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; }
+.d { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 8px 2px; border-radius: 10px; background: var(--color-surface-2); border: 1px solid var(--color-border); font-size: 12px; }
+.d small { font-size: 10px; color: var(--color-text-secondary); }
+.d b { font-family: var(--font-display); }
+.d.done { background: var(--btn-bg); color: var(--color-on-primary); border-color: transparent; small { color: inherit; opacity: .8; } }
+.d.big { border-color: var(--tier-gold); }

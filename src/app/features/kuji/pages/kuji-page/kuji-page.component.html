@@ -1,0 +1,64 @@
+<app-game-frame gameId="kuji">
+  <ng-container *ngIf="kuji.state$ | async as s">
+    <section class="hero mb-card">
+      <app-prize-art class="cover" itemId="jp_jin" gameId="kuji"></app-prize-art>
+      <div class="hi">
+        <div class="mb-eyebrow">{{ 'kuji.series' | t }}</div>
+        <h2 class="mb-title">{{ 'kuji.boxN' | t: { n: kuji.box.no } }}</h2>
+        <div class="remain"><b>{{ kuji.remaining() }}</b>/{{ total }} {{ 'kuji.ticketsLeft' | t }}</div>
+        <div class="queue">{{ lockText }}</div>
+        <div class="hb">
+          <button type="button" class="mb-btn mb-btn--ghost mb-btn--sm" (click)="pickBox()">{{ 'kuji.switchBox' | t }}</button>
+          <button type="button" class="mb-btn mb-btn--ghost mb-btn--sm" (click)="openOdds()">{{ 'common.odds' | t }}</button>
+        </div>
+      </div>
+    </section>
+
+    <div class="tiers">
+      <div class="chip" *ngFor="let t of tiers"><app-tier-tag [tier]="t"></app-tier-tag><b>{{ kuji.tierLeft(t).left }}</b>/{{ kuji.tierLeft(t).total }}</div>
+      <div class="chip"><app-tier-tag tier="LAST"></app-tier-tag>{{ (kuji.box.lastOneBy ? 'kuji.claimed' : 'kuji.lockedLast') | t }}</div>
+    </div>
+
+    <div class="last mb-card">
+      <app-prize-art class="la" [itemId]="lastOne" gameId="kuji"></app-prize-art>
+      <div>
+        <app-tier-tag tier="LAST"></app-tier-tag>
+        <h4>{{ lastOne | itemName }}</h4>
+        <p *ngIf="kuji.box.lastOneBy; else open">{{ 'kuji.lastClaimedBy' | t: { user: (kuji.box.lastOneBy | userName) } }}</p>
+        <ng-template #open><p>{{ 'kuji.lastHow' | t: { n: kuji.remaining() } }}</p></ng-template>
+      </div>
+    </div>
+
+    <div class="mb-seg tabs">
+      <button type="button" [class.on]="tab === 'prizes'" (click)="tab = 'prizes'">{{ 'kuji.prizes' | t }}</button>
+      <button type="button" [class.on]="tab === 'log'" (click)="tab = 'log'">{{ 'kuji.log' | t }}</button>
+    </div>
+
+    <div class="grid" *ngIf="tab === 'prizes'">
+      <div class="pz" *ngFor="let p of prizes" [class.out]="!left(p.itemId)" [class.flash]="flashId === p.itemId">
+        <app-item-tile [itemId]="p.itemId" [tier]="p.tier" size="sm" [showValue]="false" [dim]="!left(p.itemId)" gameId="kuji">
+          <div class="meta"><span><b>{{ left(p.itemId) }}</b>/{{ p.quantity }}</span><i>{{ odds(p.itemId) }}</i></div>
+        </app-item-tile>
+      </div>
+    </div>
+
+    <div class="log mb-card" *ngIf="tab === 'log'">
+      <div class="row" *ngFor="let l of kuji.box.log" [class.me]="l.me">
+        <app-avatar [seed]="l.user"></app-avatar>
+        <div class="tx"><b>{{ l.user | userName }}</b> {{ 'kuji.pulled' | t: { item: (l.itemId | itemName) } }}<small>{{ l.at | ago }}</small></div>
+        <app-tier-tag [tier]="l.tier"></app-tier-tag>
+      </div>
+      <p class="mb-muted" *ngIf="!kuji.box.log.length">{{ 'kuji.noPulls' | t }}</p>
+    </div>
+
+    <div class="bar">
+      <button type="button" class="mb-btn mb-btn--ghost" [disabled]="disabled(0)" (click)="draw(0)">{{ 'common.trial' | t }}</button>
+      <button type="button" class="mb-btn" *ngFor="let d of draws" [disabled]="disabled(d)" (click)="draw(d)">
+        <span class="dl">{{ d === 'all' ? ('kuji.buyAll' | t) : ('kuji.pullN' | t: { n: d }) }}</span>
+        <small><app-coin></app-coin>{{ cost(d) | coins }}</small>
+      </button>
+    </div>
+  </ng-container>
+  <app-kuji-show *ngIf="show" [pulls]="show.pulls" [trial]="show.trial" [againKey]="show.again" (finished)="onShowDone($event)"></app-kuji-show>
+</app-game-frame>
+

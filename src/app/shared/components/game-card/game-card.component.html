@@ -1,0 +1,7 @@
+<a class="gc" [attr.data-variant]="variant" [routerLink]="view.route" [mbVars]="{ '--gc': view.accent }">
+  <span class="mb-badge" *ngIf="view.badge !== 'none'" [attr.data-badge]="view.badge">{{ 'badge.' + view.badge | t }}</span>
+  <span class="ic" [innerHTML]="icon"></span>
+  <span class="nm">{{ view.nameKey | t }}</span>
+  <span class="ds" *ngIf="variant === 'card'">{{ view.descKey | t }}</span>
+  <span class="mb-btn mb-btn--sm go" *ngIf="variant === 'card'">{{ 'common.play' | t }}</span>
+</a>

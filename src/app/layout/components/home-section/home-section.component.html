@@ -1,0 +1,16 @@
+<ng-container [ngSwitch]="sectionId">
+  <app-search-section *ngSwitchCase="'search'"></app-search-section>
+  <app-banner-section *ngSwitchCase="'banner'"></app-banner-section>
+  <app-quick-actions-section *ngSwitchCase="'quickActions'"></app-quick-actions-section>
+  <app-categories-section *ngSwitchCase="'categories'"></app-categories-section>
+  <app-boxes-section *ngSwitchCase="'boxes'"></app-boxes-section>
+  <app-games-section *ngSwitchCase="'games'"></app-games-section>
+  <app-battles-section *ngSwitchCase="'battles'"></app-battles-section>
+  <app-top-pulls-section *ngSwitchCase="'topPulls'"></app-top-pulls-section>
+  <app-check-in-section *ngSwitchCase="'checkIn'"></app-check-in-section>
+  <app-missions-section *ngSwitchCase="'missions'"></app-missions-section>
+  <app-portfolio-section *ngSwitchCase="'portfolio'"></app-portfolio-section>
+  <app-pack-deck-section *ngSwitchCase="'packDeck'"></app-pack-deck-section>
+  <app-drop-calendar-section *ngSwitchCase="'dropCalendar'"></app-drop-calendar-section>
+  <app-live-drops-section *ngSwitchCase="'liveDrops'"></app-live-drops-section>
+</ng-container>

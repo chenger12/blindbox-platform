@@ -1,0 +1,10 @@
+<app-section-header titleKey="home.topPulls"></app-section-header>
+<div class="rank mb-card">
+  <div class="row" *ngFor="let e of top$ | async; let i = index">
+    <span class="n">{{ i + 1 }}</span>
+    <app-avatar [seed]="e.user"></app-avatar>
+    <div class="who"><b>{{ e.user | userName }}</b><small>{{ e.createdAt | ago }}</small></div>
+    <app-prize-art class="art" [itemId]="e.itemId"></app-prize-art>
+    <div class="it"><span>{{ e.itemId | itemName }}</span></div>
+  </div>
+</div>

@@ -1,0 +1,22 @@
+<div class="mb-dialog-body">
+  <h2 class="mb-title">{{ 'market.listTitle' | t }}</h2>
+  <ng-container *ngIf="entries.length; else none">
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <label class="mb-label">{{ 'market.chooseItem' | t }}</label>
+      <div class="pick">
+        <button type="button" *ngFor="let e of entries" class="p" (click)="choose(e.uid)">
+          <app-item-tile [itemId]="e.itemId" size="xs" [selected]="form.controls.uid.value === e.uid"></app-item-tile>
+        </button>
+      </div>
+      <label class="mb-label" for="sell-price">{{ 'market.priceLabel' | t: { value: selectedValue } }}</label>
+      <input id="sell-price" class="mb-input" type="number" min="1" formControlName="price" />
+      <div class="total"><span>{{ 'market.youReceive' | t }}</span><b><app-coin></app-coin>{{ receive | coins }}</b></div>
+      <button class="mb-btn mb-btn--lg mb-btn--block" type="submit" [disabled]="form.invalid">{{ 'market.listCta' | t }}</button>
+      <p class="note">{{ 'market.listNote' | t }}</p>
+    </form>
+  </ng-container>
+  <ng-template #none>
+    <p class="mb-muted">{{ 'market.nothingToSell' | t }}</p>
+    <a class="mb-btn mb-btn--block" routerLink="/boxes" (click)="ref.close()">{{ 'common.browseBoxes' | t }}</a>
+  </ng-template>
+</div>

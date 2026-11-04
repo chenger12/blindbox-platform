@@ -1,0 +1,70 @@
+:host { display: block; min-height: 100vh; }
+.shell { min-height: 100vh; display: flex; flex-direction: column; }
+.top {
+  position: sticky; top: 0; z-index: 50; height: var(--topbar-height); display: flex; align-items: center; gap: 10px;
+  padding: 0 16px; background: color-mix(in srgb, var(--color-bg) 82%, transparent); backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--color-border);
+}
+.brand { display: flex; align-items: center; gap: 9px; text-decoration: none; min-width: 0; }
+.logo { width: 30px; height: 30px; border-radius: 8px; flex: none; }
+.name { font: var(--title-weight) 18px/1 var(--font-display); text-transform: var(--title-transform); letter-spacing: .04em; white-space: nowrap; }
+.grow { flex: 1; }
+.topnav { display: flex; gap: 2px; margin-left: 12px; overflow-x: auto; scrollbar-width: none; }
+.topnav a { padding: 8px 12px; border-radius: var(--btn-radius); text-decoration: none; font-weight: 700; font-size: 13.5px; color: var(--color-text-secondary); white-space: nowrap; }
+.topnav a.on { color: var(--color-text-primary); background: var(--color-surface-2); }
+.lang { height: 32px; border-radius: 8px; border: 1px solid var(--color-border); background: var(--color-surface); color: var(--color-text-primary); font-size: 12px; padding: 0 6px; }
+.icon-btn { width: 34px; height: 34px; border-radius: 10px; border: 1px solid var(--color-border); background: var(--color-surface); display: grid; place-items: center; cursor: pointer; color: var(--color-text-secondary); svg { width: 18px; } }
+.bal {
+  display: flex; align-items: center; gap: 6px; height: 36px; padding: 0 4px 0 12px; border-radius: 999px;
+  background: var(--color-surface); border: 1px solid var(--color-border); font: 800 14px/1 var(--font-display);
+}
+.plus { width: 28px; height: 28px; border-radius: 50%; border: 0; background: var(--btn-bg); color: var(--color-on-primary); font-weight: 900; font-size: 17px; cursor: pointer; }
+.shake, .shake2 { animation: shake .45s; }
+@keyframes shake { 20%, 60% { transform: translateX(-5px); } 40%, 80% { transform: translateX(5px); } }
+
+.body { flex: 1; display: flex; min-width: 0; }
+.main { flex: 1; min-width: 0; padding-bottom: 24px; }
+.side { position: sticky; top: var(--topbar-height); align-self: flex-start; width: var(--sidebar-width); height: calc(100vh - var(--topbar-height)); padding: 16px 10px; border-right: 1px solid var(--color-border); display: flex; flex-direction: column; gap: 2px; overflow: auto; }
+.side a { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--btn-radius); text-decoration: none; font-weight: 700; font-size: 14px; color: var(--color-text-secondary); }
+.side a.on { background: var(--color-surface-2); color: var(--color-text-primary); }
+.side .ic { width: 20px; height: 20px; display: grid; }
+.side .ic ::ng-deep svg { width: 20px; height: 20px; }
+.foot { max-width: 1120px; margin: 40px auto 0; padding: 18px 16px; display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 12px; color: var(--color-text-secondary); border-top: 1px solid var(--color-border); }
+
+.shell[data-nav='bottom'] .main { padding-bottom: calc(var(--bottom-nav-height) + 24px + env(safe-area-inset-bottom)); }
+.tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; display: flex; justify-content: space-around;
+  height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom)); padding-bottom: env(safe-area-inset-bottom);
+  background: color-mix(in srgb, var(--color-surface) 92%, transparent); backdrop-filter: blur(16px); border-top: 1px solid var(--color-border);
+}
+.tabbar a { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; text-decoration: none; color: var(--color-text-secondary); font-size: 10.5px; font-weight: 700; max-width: 120px; }
+.tabbar .ic { width: 24px; height: 24px; display: grid; }
+.tabbar .ic ::ng-deep svg { width: 24px; height: 24px; }
+.tabbar a.on { color: var(--color-primary); }
+.tabbar .lb { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+
+/* classic template: centred brand, chunkier tab bar with a raised centre action */
+.shell[data-template='classic'] {
+  .top { justify-content: center; }
+  .tabbar a:nth-child(3) .ic { width: 50px; height: 50px; margin-top: -26px; border-radius: 50%; background: var(--btn-bg); color: var(--color-on-primary); place-items: center; box-shadow: var(--btn-shadow), 0 6px 16px #0004; border: var(--btn-border); }
+  .tabbar a:nth-child(3) .ic ::ng-deep svg { width: 26px; height: 26px; }
+}
+/* Phone / tablet: only the mobile choice is visible. */
+@media (max-width: 1023px) {
+  .shell:not([data-nav='top']) .topnav { display: none; }
+  .shell:not([data-nav='side']) .side { display: none; }
+}
+/* Web version: the desktop choice replaces the bottom tab bar. */
+@media (min-width: 1024px) {
+  .tabbar { display: none; }
+  .shell[data-nav='bottom'] .main { padding-bottom: 24px; }
+  .shell:not([data-dnav='top']) .topnav { display: none; }
+  .shell:not([data-dnav='side']) .side { display: none; }
+  .shell[data-dnav='top'] .topnav { margin-left: 28px; }
+  .shell[data-template='classic'] .top { justify-content: flex-start; }
+}
+@media (max-width: 640px) {
+  .name { display: none; }
+  .lang { width: 52px; }
+  .shell[data-nav='side'] .side { display: none; }
+}

@@ -1,0 +1,19 @@
+:host { display: block; }
+.bxa {
+  position: relative; aspect-ratio: 1; border-radius: var(--card-radius); overflow: hidden;
+  background: radial-gradient(120% 90% at 50% 10%, var(--c1), var(--c2)); isolation: isolate;
+}
+.glow { position: absolute; inset: 20% 15% auto; height: 60%; border-radius: 50%; background: var(--c1); filter: blur(28px); opacity: .7; z-index: -1; }
+.brand {
+  position: absolute; left: 0; right: 0; top: 8%; text-align: center; font: 800 11px/1.1 var(--font-display);
+  letter-spacing: .14em; text-transform: uppercase; color: #ffffffd9; padding: 0 8px;
+}
+.fan { position: absolute; width: 46%; bottom: 10%; filter: drop-shadow(0 6px 10px #0006); transition: transform .3s; }
+.fan[data-i='0'] { left: 27%; bottom: 14%; width: 52%; z-index: 2; }
+.fan[data-i='1'] { left: 6%; transform: rotate(-12deg); }
+.fan[data-i='2'] { right: 6%; transform: rotate(12deg); }
+.bxa[data-size='xs'] .brand, .bxa[data-size='md'] .brand { display: none; }
+.bxa[data-size='sm'] .brand { font-size: 9px; }
+.bxa[data-size='xl'] .brand { font-size: 16px; }
+:host-context(.box-card:hover) .fan[data-i='1'] { transform: rotate(-18deg) translateY(-6px); }
+:host-context(.box-card:hover) .fan[data-i='2'] { transform: rotate(18deg) translateY(-6px); }

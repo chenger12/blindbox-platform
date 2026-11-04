@@ -1,0 +1,44 @@
+<div class="bo">
+  <header class="bar">
+    <div class="brand"><span class="logo">BO</span><div><b>{{ 'admin.title' | t }}</b><small>{{ form.controls.siteName.value }}</small></div></div>
+    <span class="state" [class.dirty]="dirty">{{ (dirty ? 'admin.unsaved' : 'admin.allSaved') | t }}</span>
+    <span class="grow"></span>
+    <select class="lang" [value]="i18n.lang" (change)="setLang($any($event.target).value)">
+      <option *ngFor="let l of i18n.languages" [value]="l.code">{{ l.label }}</option>
+    </select>
+    <a mat-stroked-button routerLink="/" target="_blank">{{ 'admin.openSite' | t }}</a>
+    <button mat-stroked-button type="button" (click)="reset()">{{ 'admin.reset' | t }}</button>
+    <button mat-stroked-button type="button" [disabled]="!dirty" (click)="discard()">{{ 'admin.discard' | t }}</button>
+    <button mat-flat-button color="primary" type="button" [disabled]="!dirty || saving" (click)="save()">{{ 'admin.save' | t }}</button>
+    <button mat-button type="button" (click)="logout()">{{ 'admin.logout' | t }}</button>
+  </header>
+
+  <div class="main">
+    <section class="editor">
+      <mat-tab-group animationDuration="150ms" mat-stretch-tabs="false">
+        <mat-tab [label]="'admin.tab.theme' | t"><app-theme-tab [form]="form"></app-theme-tab></mat-tab>
+        <mat-tab [label]="'admin.tab.games' | t"><app-games-tab [form]="form"></app-games-tab></mat-tab>
+        <mat-tab [label]="'admin.tab.layout' | t"><app-layout-tab [form]="form"></app-layout-tab></mat-tab>
+        <mat-tab [label]="'admin.tab.nav' | t"><app-nav-tab [form]="form"></app-nav-tab></mat-tab>
+        <mat-tab [label]="'admin.tab.brand' | t"><app-brand-tab [form]="form"></app-brand-tab></mat-tab>
+      </mat-tab-group>
+    </section>
+
+    <aside class="preview">
+      <div class="pv-bar">
+        <b>{{ 'admin.preview' | t }}</b>
+        <select [value]="page" (change)="setPage($any($event.target).value)">
+          <option *ngFor="let p of pages" [value]="p">{{ p }}</option>
+        </select>
+        <mat-button-toggle-group [value]="device" (change)="device = $event.value" hideSingleSelectionIndicator>
+          <mat-button-toggle value="phone">{{ 'admin.phone' | t }}</mat-button-toggle>
+          <mat-button-toggle value="desktop">{{ 'admin.desktop' | t }}</mat-button-toggle>
+        </mat-button-toggle-group>
+      </div>
+      <div class="stage" [attr.data-device]="device">
+        <iframe #frame class="frame" [src]="previewUrl" title="preview" (load)="pushPreview()"></iframe>
+      </div>
+      <p class="pv-note">{{ 'admin.previewNote' | t }}</p>
+    </aside>
+  </div>
+</div>

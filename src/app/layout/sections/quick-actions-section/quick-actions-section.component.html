@@ -1,0 +1,3 @@
+<div class="qa">
+  <app-game-card *ngFor="let g of registry.enabled$ | async" [game]="g" variant="tile"></app-game-card>
+</div>

@@ -1,0 +1,5 @@
+:host { display: block; }
+.tabs { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+h1 { font-size: 28px; }
+a { text-decoration: none; }
+a.on button { background: var(--color-surface); color: var(--color-text-primary); }

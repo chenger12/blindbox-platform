@@ -1,0 +1,12 @@
+:host { display: block; min-height: 100vh; background: var(--admin-bg); color: var(--admin-ink); font-family: var(--admin-font); }
+.wrap { min-height: 100vh; display: grid; place-items: center; padding: 20px; }
+.card { width: 100%; max-width: 380px; padding: 28px; border-radius: 16px; background: var(--admin-surface); border: 1px solid var(--admin-line); box-shadow: 0 20px 60px var(--admin-shadow); display: flex; flex-direction: column; }
+.logo { width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center; background: var(--admin-ink); color: var(--admin-surface); font-weight: 900; margin-bottom: 14px; }
+h1 { margin: 0; font-size: 22px; }
+.sub { margin: 4px 0 18px; color: var(--admin-muted); font-size: 13.5px; }
+label { font-size: 12px; font-weight: 700; color: var(--admin-muted); margin: 10px 0 4px; }
+input { height: 42px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--admin-line); background: var(--admin-bg); color: var(--admin-ink); font: inherit; }
+.err { color: var(--admin-danger); font-size: 13px; margin: 10px 0 0; }
+button { margin-top: 18px; height: 44px; }
+.hint { font-size: 12px; color: var(--admin-muted); margin: 14px 0 0; code { background: var(--admin-bg); padding: 1px 6px; border-radius: 4px; } }
+.foot { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; font-size: 13px; select { height: 30px; border-radius: 8px; border: 1px solid var(--admin-line); background: var(--admin-surface); color: var(--admin-ink); } a { color: var(--admin-accent); } }

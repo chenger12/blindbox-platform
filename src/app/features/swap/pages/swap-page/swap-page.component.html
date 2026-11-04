@@ -1,0 +1,46 @@
+<app-game-frame gameId="swap">
+  <div class="mb-seg hub" *ngIf="registry.isEnabled('market')">
+    <a routerLink="/market"><button type="button" tabindex="-1">{{ 'market.buySell' | t }}</button></a>
+    <button type="button" class="on">{{ 'game.swap.name' | t }}</button>
+  </div>
+  <form [formGroup]="form">
+    <div class="top">
+      <div class="mb-seg">
+        <button type="button" [class.on]="form.controls.main.value === 'board'" (click)="form.controls.main.setValue('board')">{{ 'swap.board' | t }}</button>
+        <button type="button" [class.on]="form.controls.main.value === 'deals'" (click)="form.controls.main.setValue('deals')">{{ 'swap.deals' | t }}</button>
+      </div>
+      <span class="tk">{{ 'swap.ticketsN' | t: { n: (wallet.state$ | async)?.swapTickets ?? 0 } }}</span>
+    </div>
+
+    <ng-container *ngIf="form.controls.main.value === 'board'; else dealsTpl">
+      <div class="bar">
+        <input class="mb-input" formControlName="q" [placeholder]="'swap.search' | t" />
+        <select class="mb-select cat" formControlName="cat"><option *ngFor="let c of cats" [value]="c">{{ 'swap.cat.' + c | t }}</option></select>
+      </div>
+      <div class="acts">
+        <div class="mb-chips">
+          <button type="button" *ngFor="let s of subs" class="mb-chip" [class.on]="form.controls.sub.value === s" (click)="form.controls.sub.setValue(s)">
+            {{ 'swap.sub.' + s | t }}<i class="dot" *ngIf="s === 'mine' && (hasIncoming$ | async)"></i>
+          </button>
+        </div>
+        <button type="button" class="mb-btn mb-btn--ghost mb-btn--sm" (click)="swap.refresh()">{{ 'swap.refresh' | t }}</button>
+        <button type="button" class="mb-btn mb-btn--ghost mb-btn--sm" (click)="rules()">{{ 'swap.rules' | t }}</button>
+      </div>
+      <div class="list" *ngIf="posts$ | async as posts">
+        <app-swap-post *ngFor="let p of posts; trackBy: trackPost" [post]="p" (action)="onAction($event)"></app-swap-post>
+        <app-empty-state *ngIf="!posts.length" [titleKey]="'swap.empty.' + form.controls.sub.value"></app-empty-state>
+      </div>
+    </ng-container>
+
+    <ng-template #dealsTpl>
+      <div class="deals mb-card">
+        <div class="deal" *ngFor="let d of deals$ | async">
+          <app-avatar [seed]="d.a + d.b"></app-avatar>
+          <div class="dt"><b>{{ 'swap.dealLine' | t: { a: (d.a | userName), b: (d.b | userName) } }}</b><small>{{ d.itemA | itemName }} ⇄ {{ d.itemB | itemName }} · {{ d.createdAt | ago }}</small></div>
+          <div class="di"><app-prize-art [itemId]="d.itemA"></app-prize-art><span>⇄</span><app-prize-art [itemId]="d.itemB"></app-prize-art></div>
+        </div>
+      </div>
+    </ng-template>
+  </form>
+  <button type="button" class="fab mb-btn mb-btn--lg" (click)="create()">+ {{ 'swap.listTrade' | t }}</button>
+</app-game-frame>

@@ -1,0 +1,7 @@
+<div class="mb-wrap page">
+  <h1 class="mb-title">{{ 'nav.games' | t }}</h1>
+  <p class="mb-muted">{{ 'games.intro' | t }}</p>
+  <div class="grid">
+    <app-game-card *ngFor="let g of registry.enabled$ | async" [game]="g"></app-game-card>
+  </div>
+</div>

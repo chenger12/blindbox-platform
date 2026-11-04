@@ -1,0 +1,13 @@
+<app-section-header titleKey="home.missions"></app-section-header>
+<div class="ms mb-card" *ngIf="daily.state$ | async as s">
+  <div class="m" *ngFor="let m of missions">
+    <div class="tx">
+      <b>{{ 'mission.' + m.id | t }}</b>
+      <app-progress-bar [value]="s.missions[m.field] / m.goal"></app-progress-bar>
+      <small>{{ s.missions[m.field] > m.goal ? m.goal : s.missions[m.field] }}/{{ m.goal }} · +{{ m.reward }} {{ 'common.coins' | t }}</small>
+    </div>
+    <button type="button" class="mb-btn mb-btn--sm" [disabled]="s.missions[m.field] < m.goal || s.missions.claimed.includes(m.id)" (click)="claim(m.id)">
+      {{ (s.missions.claimed.includes(m.id) ? 'home.claimed' : 'home.claim') | t }}
+    </button>
+  </div>
+</div>

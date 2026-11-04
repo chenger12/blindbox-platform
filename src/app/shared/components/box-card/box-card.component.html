@@ -1,0 +1,10 @@
+<a class="box-card mb-card" [routerLink]="['/boxes', box.id]" [class.compact]="compact">
+  <span class="mb-badge" *ngIf="box.tag !== 'none'" [attr.data-badge]="box.tag">{{ 'badge.' + box.tag | t }}</span>
+  <app-box-art [box]="box" [size]="compact ? 'sm' : 'md'"></app-box-art>
+  <div class="name">{{ 'box.' + box.id + '.name' | t }}</div>
+  <div class="sub">{{ 'boxes.cardSub' | t: { n: box.itemIds.length, max: (box.maxValue | coins) } }}</div>
+  <div class="foot">
+    <span class="price"><app-coin></app-coin>{{ box.price | coins }}</span>
+    <span class="mb-btn mb-btn--sm">{{ 'common.open' | t }}</span>
+  </div>
+</a>

@@ -1,0 +1,27 @@
+<app-game-frame gameId="wheel">
+  <div class="wrap">
+    <div class="wh" [class.fast]="spinning">
+      <div class="lights"><i *ngFor="let i of lights" [mbVars]="{ '--i': i }"></i></div>
+      <canvas #cv class="cv"></canvas>
+      <div class="ptr"></div>
+      <button type="button" class="go" [disabled]="spinning" (click)="spin()">{{ 'wheel.spin' | t }}</button>
+    </div>
+    <div class="info">
+      <h2 class="mb-title">{{ 'wheel.title' | t }}</h2>
+      <p class="mb-muted" *ngIf="daily.state$ | async">{{ (freeToday ? 'wheel.freeReady' : 'wheel.freeUsed') | t: { n: price } }}</p>
+      <button type="button" class="mb-btn mb-btn--lg" [disabled]="spinning" (click)="spin()">
+        <ng-container *ngIf="freeToday; else paid">{{ 'wheel.spinFree' | t }}</ng-container>
+        <ng-template #paid>{{ 'wheel.spin' | t }} · <app-coin></app-coin>{{ price }}</ng-template>
+      </button>
+    </div>
+  </div>
+  <app-section-header titleKey="wheel.history"></app-section-header>
+  <div class="log mb-card">
+    <div class="row" *ngFor="let l of (wheel.log$ | async)?.slice(0, 8)">
+      <app-avatar seed="me"></app-avatar>
+      <span class="tx">{{ 'wheel.landed' | t: { label: label(segments[l.index].labelKey), sub: label(segments[l.index].subKey) } }}</span>
+      <small>{{ l.at | ago }}</small>
+    </div>
+    <p class="mb-muted" *ngIf="!(wheel.log$ | async)?.length">{{ 'wheel.empty' | t }}</p>
+  </div>
+</app-game-frame>

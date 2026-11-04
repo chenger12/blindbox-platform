@@ -1,0 +1,11 @@
+<div class="tile" [attr.data-rarity]="rarity" [attr.data-size]="size" [class.sel]="selected" [class.dim]="dim">
+  <div class="top">
+    <app-tier-tag *ngIf="tier" [tier]="tier" [short]="size === 'xs'"></app-tier-tag>
+    <span class="rar" *ngIf="showRarity && !tier && size !== 'xs'">{{ 'rarity.' + rarity | t }}</span>
+  </div>
+  <app-prize-art class="img" [itemId]="itemId" [gameId]="gameId"></app-prize-art>
+  <div class="name" *ngIf="showName">{{ itemId | itemName }}</div>
+  <div class="val" *ngIf="showValue"><app-coin></app-coin>{{ value | coins }}</div>
+  <div class="odds" *ngIf="odds">{{ odds }}</div>
+  <ng-content></ng-content>
+</div>

@@ -1,0 +1,17 @@
+@use '../admin-tab' as *;
+.region h4 { margin: 14px 0 8px; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--admin-muted); }
+.presets { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 10px; }
+.preset { text-align: left; padding: 8px 8px 10px; border-radius: 12px; border: 2px solid var(--admin-line); background: var(--admin-surface); cursor: pointer; display: flex; flex-direction: column; gap: 3px; color: var(--admin-ink); font: inherit; }
+.preset.on { border-color: var(--admin-accent); box-shadow: 0 0 0 3px var(--admin-accent-bg); }
+.preset b { font-size: 14px; margin-top: 6px; }
+.preset small { font-size: 11.5px; color: var(--admin-muted); line-height: 1.35; }
+.preset em { font-style: normal; font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--admin-accent); margin-top: 2px; }
+.mock { height: 110px; border-radius: 8px; padding: 8px; background: var(--p-bg); display: flex; flex-direction: column; gap: 6px; overflow: hidden; }
+.m-top { display: flex; justify-content: space-between; align-items: center; i { width: 18px; height: 6px; border-radius: 3px; background: var(--p-muted); } span { font: 800 13px var(--p-font); color: var(--p-ink); } }
+.m-card { flex: 1; display: flex; gap: 6px; padding: 5px; border-radius: calc(var(--p-card-radius) * .5); background: var(--p-surface); border: var(--p-border); }
+.m-tile { width: 34px; border-radius: 5px; background: var(--p-tile); }
+.m-lines { flex: 1; display: flex; flex-direction: column; gap: 4px; justify-content: center; i { height: 5px; border-radius: 3px; background: var(--p-muted); opacity: .6; } i:first-child { width: 80%; background: var(--p-ink); opacity: 1; } }
+.m-btn { align-self: flex-start; padding: 3px 10px; border-radius: var(--p-radius); background: var(--p-btn); color: var(--p-on); font: 800 10px var(--p-font); box-shadow: var(--p-shadow); border: var(--p-btn-border); }
+.colors { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 8px; }
+.color { display: flex; gap: 8px; align-items: center; padding: 6px; border: 1px solid var(--admin-line); border-radius: 10px; input[type='color'] { width: 38px; height: 38px; border: 0; padding: 0; background: none; cursor: pointer; } span { display: flex; flex-direction: column; min-width: 0; flex: 1; b { font-size: 11.5px; } } }
+.hex { height: 24px !important; font-size: 12px !important; padding: 0 6px !important; }

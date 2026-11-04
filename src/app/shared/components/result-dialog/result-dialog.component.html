@@ -1,0 +1,24 @@
+<div class="res" [class.big]="big">
+  <div class="rays" *ngIf="big"></div>
+  <div class="mb-eyebrow">{{ (d.trial ? 'result.trial' : (d.titleKey ?? 'result.youGot')) | t: d.titleParams ?? null }}</div>
+  <h2 class="headline">{{ (big ? 'result.huge' : 'result.nice') | t }}</h2>
+  <div class="total"><app-coin></app-coin>{{ total | coins }}</div>
+  <div class="grid" [class.single]="d.items.length === 1">
+    <app-item-tile *ngFor="let it of d.items; let i = index" class="pop" [attr.data-i]="i"
+      [itemId]="it.itemId" [tier]="it.tier" [size]="d.items.length === 1 ? 'lg' : 'sm'"></app-item-tile>
+  </div>
+  <div class="btns">
+    <ng-container *ngIf="d.trial; else real">
+      <button class="mb-btn" type="button" (click)="close('real')">{{ 'result.playReal' | t }}</button>
+      <button class="mb-btn mb-btn--ghost" type="button" (click)="close('close')">{{ 'common.close' | t }}</button>
+    </ng-container>
+    <ng-template #real>
+      <button class="mb-btn" type="button" (click)="close('keep')">{{ (d.items.length > 1 ? 'result.keepAll' : 'result.keep') | t }}</button>
+      <button *ngIf="canSell" class="mb-btn mb-btn--ghost" type="button" (click)="close('sell')">
+        {{ 'result.sellFor' | t }} <app-coin></app-coin>{{ sellValue | coins }}
+      </button>
+      <button *ngIf="d.againLabelKey" class="mb-btn mb-btn--ghost" type="button" (click)="close('again')">{{ d.againLabelKey | t }}</button>
+    </ng-template>
+  </div>
+  <p class="note" *ngIf="!d.trial">{{ 'result.note' | t }}</p>
+</div>

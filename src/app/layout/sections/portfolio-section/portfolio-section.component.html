@@ -1,0 +1,19 @@
+<section class="pf mb-card" *ngIf="view$ | async as v">
+  <div class="hd">
+    <div>
+      <div class="mb-eyebrow">{{ 'home.portfolio' | t }}</div>
+      <div class="val"><app-coin></app-coin>{{ v.value | coins }}</div>
+      <div class="chg" [class.up]="v.change >= 0">{{ v.change >= 0 ? '▲' : '▼' }} {{ (v.change * 100).toFixed(1) }}% · {{ 'home.items' | t: { n: v.count } }}</div>
+    </div>
+    <app-prize-art *ngIf="v.best" class="best" [itemId]="v.best"></app-prize-art>
+  </div>
+  <svg class="chart" viewBox="0 0 300 90" preserveAspectRatio="none">
+    <path class="area" [attr.d]="v.area"></path>
+    <path class="line" [attr.d]="v.path"></path>
+  </svg>
+  <p class="note">{{ 'home.portfolioNote' | t }}</p>
+  <div class="btns">
+    <a class="mb-btn mb-btn--sm" routerLink="/me">{{ 'home.viewCollection' | t }}</a>
+    <a class="mb-btn mb-btn--ghost mb-btn--sm" routerLink="/market">{{ 'nav.market' | t }}</a>
+  </div>
+</section>

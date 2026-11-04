@@ -1,0 +1,50 @@
+<app-game-frame gameId="gacha">
+  <div class="stage">
+    <div class="machine">
+      <div class="dome"><canvas #cv class="cv"></canvas><div class="glass"></div></div>
+      <div class="body">
+        <div class="label">GACHA · {{ price }}</div>
+        <button type="button" class="knob" [mbVars]="{ '--rot': knob + 'deg' }" [disabled]="busy" (click)="spin(1, false)" [attr.aria-label]="'gacha.turn' | t"><i></i></button>
+        <div class="chute"></div>
+      </div>
+    </div>
+    <div class="tray" #trayEl>
+      <button type="button" *ngFor="let t of tray" #capEl class="cap" [attr.data-kind]="t.kind" [class.opened]="t.opened" [class.wob]="t.wob" (click)="open(t, capEl)">
+        <span class="h1" [mbVars]="{ '--cap': t.color }"></span><span class="h2"></span>
+        <span class="got"><app-prize-art [itemId]="t.entry.itemId" gameId="gacha"></app-prize-art><app-tier-tag [tier]="t.entry.tier" [short]="true"></app-tier-tag></span>
+        <span class="tap">{{ 'gacha.tapOpen' | t }}</span>
+      </button>
+      <button type="button" *ngIf="tray.length > 1 && !allOpened()" class="mb-btn mb-btn--ghost mb-btn--sm all" (click)="openAllIn(trayEl)">{{ 'gacha.openAll' | t }}</button>
+    </div>
+  </div>
+
+  <div class="pity mb-card" *ngIf="gacha.pity$ | async as p; else pity0">
+    <div class="ph"><span>{{ 'gacha.pity' | t: { n: pityMax - p } }}</span><b>{{ p }}/{{ pityMax }}</b></div>
+    <app-progress-bar [value]="p / pityMax" tone="gold"></app-progress-bar>
+  </div>
+  <ng-template #pity0>
+    <div class="pity mb-card"><div class="ph"><span>{{ 'gacha.pity' | t: { n: pityMax } }}</span><b>0/{{ pityMax }}</b></div><app-progress-bar [value]="0" tone="gold"></app-progress-bar></div>
+  </ng-template>
+
+  <div class="btns">
+    <button type="button" class="mb-btn mb-btn--ghost" [disabled]="busy" (click)="spin(1, true)">{{ 'common.trial' | t }}</button>
+    <button type="button" class="mb-btn" [disabled]="busy" (click)="spin(1, false)">
+      <span>{{ 'gacha.spin1' | t }}</span>
+      <small *ngIf="(wallet.state$ | async)?.gachaTickets; else coin1">{{ 'gacha.freeTicket' | t }}</small>
+      <ng-template #coin1><small><app-coin></app-coin>{{ price }}</small></ng-template>
+    </button>
+    <button type="button" class="mb-btn" [disabled]="busy" (click)="spin(5, false)"><span>{{ 'gacha.spin5' | t }}</span><small><app-coin></app-coin>{{ price5 }}</small></button>
+  </div>
+  <div class="meta">
+    <span>{{ 'gacha.tickets' | t: { n: (wallet.state$ | async)?.gachaTickets ?? 0 } }}</span>
+    <button type="button" class="link" (click)="openOdds()">{{ 'common.odds' | t }}</button>
+  </div>
+
+  <app-section-header titleKey="gacha.collection"></app-section-header>
+  <div class="coll">
+    <div class="c" *ngFor="let p of pool" [class.no]="!owned(p.itemId)">
+      <app-tier-tag *ngIf="p.tier !== 'N'" [tier]="p.tier" [short]="true"></app-tier-tag>
+      <app-prize-art [itemId]="p.itemId" gameId="gacha"></app-prize-art>
+    </div>
+  </div>
+</app-game-frame>

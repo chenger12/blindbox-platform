@@ -1,0 +1,26 @@
+<app-game-frame gameId="claw">
+  <div class="cab">
+    <div class="top"><span>{{ 'claw.timer' | t }} <b>{{ timeLeft }}s</b></span><span>{{ 'claw.plays' | t: { n: (claw.state$ | async)?.plays ?? 0 } }}</span></div>
+    <div class="screen">
+      <canvas #cv class="cv"></canvas>
+      <div class="msg" *ngIf="message">
+        <h3 class="mb-title">{{ message.key | t: message.params ?? null }}</h3>
+        <button *ngIf="!playing" type="button" class="mb-btn mb-btn--gold mb-btn--lg" (click)="start()">{{ (message.retry ? 'claw.retry' : 'claw.start') | t }} · <app-coin></app-coin>{{ price }}</button>
+      </div>
+    </div>
+    <div class="ctrl">
+      <button type="button" class="pad" [class.hold]="holdDir === -1" (pointerdown)="dir(-1)" (pointerup)="dir(0)" (pointerleave)="dir(0)" (pointercancel)="dir(0)" aria-label="left">◀</button>
+      <button type="button" class="grab" (click)="grab()">{{ (playing ? 'claw.grab' : 'claw.insertShort') | t }}</button>
+      <button type="button" class="pad" [class.hold]="holdDir === 1" (pointerdown)="dir(1)" (pointerup)="dir(0)" (pointerleave)="dir(0)" (pointercancel)="dir(0)" aria-label="right">▶</button>
+    </div>
+  </div>
+  <div class="pity mb-card" *ngIf="claw.state$ | async as s">
+    <div class="ph">
+      <span *ngIf="s.pity < pityMax; else ready">{{ 'claw.pity' | t: { n: pityMax - s.pity } }}</span>
+      <ng-template #ready><b>{{ 'claw.powerReady' | t }}</b></ng-template>
+      <span>{{ s.pity > pityMax ? pityMax : s.pity }}/{{ pityMax }}</span>
+    </div>
+    <app-progress-bar [value]="s.pity / pityMax" tone="gold"></app-progress-bar>
+  </div>
+  <p class="mb-muted keys">{{ 'claw.keys' | t }}</p>
+</app-game-frame>

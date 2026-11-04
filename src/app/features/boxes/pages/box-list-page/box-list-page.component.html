@@ -1,0 +1,19 @@
+<app-game-frame gameId="boxes" [wide]="true">
+  <form class="bar" [formGroup]="form">
+    <input class="mb-input q" formControlName="q" [placeholder]="'home.searchPlaceholder' | t" />
+    <select class="mb-select s" formControlName="sort">
+      <option value="featured">{{ 'boxes.sortFeatured' | t }}</option>
+      <option value="low">{{ 'boxes.sortLow' | t }}</option>
+      <option value="high">{{ 'boxes.sortHigh' | t }}</option>
+    </select>
+  </form>
+  <div class="mb-chips cats">
+    <button type="button" *ngFor="let c of cats" class="mb-chip" [class.on]="form.controls.cat.value === c" (click)="setCat(c)">{{ 'boxes.cat.' + c | t }}</button>
+  </div>
+  <ng-container *ngIf="boxes$ | async as boxes">
+    <div class="mb-grid-boxes" *ngIf="boxes.length; else none">
+      <app-box-card *ngFor="let b of boxes" [box]="b"></app-box-card>
+    </div>
+    <ng-template #none><app-empty-state titleKey="boxes.noneTitle" textKey="boxes.noneText"></app-empty-state></ng-template>
+  </ng-container>
+</app-game-frame>

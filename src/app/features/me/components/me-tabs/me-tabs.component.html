@@ -1,0 +1,7 @@
+<div class="tabs">
+  <h1 class="mb-title">{{ 'nav.me' | t }}</h1>
+  <div class="mb-seg">
+    <a routerLink="/me" [routerLinkActiveOptions]="{ exact: true }" routerLinkActive="on"><button type="button" tabindex="-1">{{ 'me.inventory' | t }}</button></a>
+    <a routerLink="/me/rewards" routerLinkActive="on"><button type="button" tabindex="-1">{{ 'me.rewards' | t }}</button></a>
+  </div>
+</div>

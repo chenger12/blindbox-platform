@@ -1,0 +1,28 @@
+<div class="mb-dialog-body">
+  <h2 class="mb-title">{{ 'swap.listTrade' | t }}</h2>
+  <ng-container *ngIf="mine.length; else none">
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <label class="mb-label">{{ 'swap.create1' | t }}</label>
+      <div class="pick scroll">
+        <button type="button" *ngFor="let e of mine" (click)="toggleGive(e.uid)"><app-item-tile [itemId]="e.itemId" size="xs" [selected]="form.controls.uids.value.includes(e.uid)"></app-item-tile></button>
+      </div>
+      <label class="mb-label">{{ 'swap.create2' | t }}</label>
+      <div class="pick scroll small">
+        <button type="button" *ngFor="let id of wants" (click)="toggleWant(id)" [title]="id | itemName"><app-item-tile [itemId]="id" size="xs" [showValue]="false" [selected]="form.controls.want.value.includes(id)"></app-item-tile></button>
+      </div>
+      <div class="chips" *ngIf="form.controls.want.value.length"><em *ngFor="let id of form.controls.want.value">{{ id | itemName }}</em></div>
+      <label class="mb-label" for="swap-note">{{ 'swap.create3' | t }}</label>
+      <input id="swap-note" class="mb-input" formControlName="note" maxlength="60" [placeholder]="'swap.notePlaceholder' | t" />
+      <div class="val">
+        <span>{{ 'swap.ticketsN' | t: { n: (wallet.state$ | async)?.swapTickets ?? 0 } }}</span>
+        <span>{{ ((wallet.state$ | async)?.swapTickets ? 'swap.usesOne' : 'swap.costs') | t: { n: fee } }}</span>
+      </div>
+      <button class="mb-btn mb-btn--block" type="submit" [disabled]="!form.controls.uids.value.length">{{ 'swap.post' | t }}</button>
+      <p class="note">{{ 'swap.postNote' | t }}</p>
+    </form>
+  </ng-container>
+  <ng-template #none>
+    <p class="mb-muted">{{ 'swap.nothingTitle' | t }}</p>
+    <a class="mb-btn mb-btn--block" routerLink="/boxes" (click)="ref.close()">{{ 'common.browseBoxes' | t }}</a>
+  </ng-template>
+</div>

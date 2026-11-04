@@ -1,0 +1,8 @@
+:host { display: block; margin-top: 4px; }
+.deck { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; padding: 6px 2px 14px; scrollbar-width: none; }
+.deck::-webkit-scrollbar { display: none; }
+.pack { position: relative; flex: none; width: 210px; scroll-snap-align: start; text-decoration: none; color: inherit; border-radius: calc(var(--card-radius) + 4px); padding: 8px; background: var(--color-surface); border: var(--card-border); overflow: hidden; transition: transform .2s; }
+.pack:hover { transform: translateY(-4px) rotate(-1deg); }
+.meta { display: flex; justify-content: space-between; align-items: center; padding: 10px 4px 2px; b { font: var(--title-weight) 14px var(--font-display); } span { display: inline-flex; gap: 4px; align-items: center; font-weight: 800; } }
+.shine { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(115deg, transparent 30%, #ffffff26 45%, transparent 60%); background-size: 250% 100%; animation: sweep 4s ease-in-out infinite; }
+@keyframes sweep { from { background-position: 150% 0; } to { background-position: -100% 0; } }

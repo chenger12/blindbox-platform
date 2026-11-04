@@ -1,0 +1,39 @@
+<div class="tab" [formGroup]="form">
+  <section formGroupName="layout">
+    <h3>{{ 'admin.nav.mobile' | t }}</h3>
+    <mat-button-toggle-group formControlName="navPosition" hideSingleSelectionIndicator>
+      <mat-button-toggle value="bottom">{{ 'admin.nav.bottom' | t }}</mat-button-toggle>
+      <mat-button-toggle value="top">{{ 'admin.nav.top' | t }}</mat-button-toggle>
+      <mat-button-toggle value="side">{{ 'admin.nav.side' | t }}</mat-button-toggle>
+    </mat-button-toggle-group>
+    <h3 class="mt">{{ 'admin.nav.desktop' | t }}</h3>
+    <p class="help">{{ 'admin.nav.desktopHelp' | t }}</p>
+    <mat-button-toggle-group formControlName="desktopNav" hideSingleSelectionIndicator>
+      <mat-button-toggle value="top">{{ 'admin.nav.top' | t }}</mat-button-toggle>
+      <mat-button-toggle value="side">{{ 'admin.nav.side' | t }}</mat-button-toggle>
+    </mat-button-toggle-group>
+    <div class="grid2">
+      <label>{{ 'admin.nav.topbar' | t }}<input formControlName="topbarHeight" /></label>
+      <label>{{ 'admin.nav.sidebar' | t }}<input formControlName="sidebarWidth" /></label>
+    </div>
+  </section>
+  <section>
+    <h3>{{ 'admin.nav.items' | t }}</h3>
+    <p class="help">{{ 'admin.nav.help' | t }}</p>
+    <p class="warn" *ngIf="form.controls.layout.controls.navPosition.value === 'bottom' && items.length > 5">{{ 'admin.nav.tooMany' | t }}</p>
+    <div class="rows" cdkDropList (cdkDropListDropped)="drop($event)">
+      <div class="row" *ngFor="let id of items; let i = index" cdkDrag [class.off]="disabledGame(id)">
+        <span class="handle" cdkDragHandle>⋮⋮</span>
+        <b class="nm">{{ 'nav.' + id | t }}</b>
+        <span class="pill" *ngIf="disabledGame(id)">{{ 'admin.nav.gameHidden' | t }}</span>
+        <button mat-button type="button" (click)="remove(id)">{{ 'admin.layout.hide' | t }}</button>
+      </div>
+    </div>
+  </section>
+  <section>
+    <h3>{{ 'admin.nav.more' | t }}</h3>
+    <div class="chips">
+      <button mat-stroked-button type="button" *ngFor="let id of unused" (click)="add(id)">+ {{ 'nav.' + id | t }}</button>
+    </div>
+  </section>
+</div>

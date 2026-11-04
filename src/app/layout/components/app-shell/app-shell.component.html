@@ -1,0 +1,51 @@
+<ng-container *ngIf="bare$ | async; else app">
+  <router-outlet></router-outlet>
+</ng-container>
+
+<ng-template #app>
+  <div class="shell" *ngIf="config$ | async as c" [attr.data-nav]="c.layout.navPosition" [attr.data-dnav]="c.layout.desktopNav" [attr.data-template]="c.template">
+    <header class="top">
+      <a class="brand" routerLink="/">
+        <img class="logo" [src]="c.logoUrl" alt="" />
+        <span class="name">{{ c.siteName }}</span>
+      </a>
+      <nav class="topnav" *ngIf="c.layout.navPosition === 'top' || c.layout.desktopNav === 'top'">
+        <a *ngFor="let l of links$ | async" [routerLink]="l.route" routerLinkActive="on" [routerLinkActiveOptions]="{ exact: l.exact }">{{ l.labelKey | t }}</a>
+      </nav>
+      <span class="grow"></span>
+      <select class="lang" [value]="i18n.lang" (change)="setLang($any($event.target).value)" [attr.aria-label]="'common.language' | t">
+        <option *ngFor="let l of i18n.languages" [value]="l.code">{{ l.label }}</option>
+      </select>
+      <button type="button" class="icon-btn" (click)="fx.toggleMute()" [attr.aria-label]="'common.sound' | t">
+        <svg *ngIf="!fx.muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/></svg>
+        <svg *ngIf="fx.muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 9h4l5-4v14l-5-4H4z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>
+      </button>
+      <div class="bal" *ngIf="wallet.state$ | async as w" [class.shake]="(wallet.shake$ | async)! % 2 === 1" [class.shake2]="(wallet.shake$ | async)! % 2 === 0 && (wallet.shake$ | async)! > 0">
+        <app-coin></app-coin><b>{{ w.coins | coins }}</b>
+        <button type="button" class="plus" (click)="topUp()" [attr.aria-label]="'common.addCoins' | t">+</button>
+      </div>
+    </header>
+
+    <div class="body">
+      <aside class="side" *ngIf="c.layout.navPosition === 'side' || c.layout.desktopNav === 'side'">
+        <a *ngFor="let l of links$ | async" [routerLink]="l.route" routerLinkActive="on" [routerLinkActiveOptions]="{ exact: l.exact }">
+          <span class="ic" [innerHTML]="l.svg"></span>{{ l.labelKey | t }}
+        </a>
+      </aside>
+      <main class="main">
+        <router-outlet></router-outlet>
+        <footer class="foot" *ngIf="c.layout.footerVisible">
+          <span>© {{ c.siteName }}</span>
+          <span>{{ 'footer.demo' | t }}</span>
+        </footer>
+      </main>
+    </div>
+
+    <nav class="tabbar" *ngIf="c.layout.navPosition === 'bottom'">
+      <a *ngFor="let l of links$ | async" [routerLink]="l.route" routerLinkActive="on" [routerLinkActiveOptions]="{ exact: l.exact }">
+        <span class="ic" [innerHTML]="l.svg"></span>
+        <span class="lb">{{ l.labelKey | t }}</span>
+      </a>
+    </nav>
+  </div>
+</ng-template>

@@ -1,0 +1,6 @@
+<app-section-header titleKey="home.games" linkKey="common.seeAll" link="/games"></app-section-header>
+<div class="gg">
+  <ng-container *ngFor="let g of registry.enabled$ | async">
+    <app-game-card *ngIf="g.id !== 'boxes'" [game]="g"></app-game-card>
+  </ng-container>
+</div>

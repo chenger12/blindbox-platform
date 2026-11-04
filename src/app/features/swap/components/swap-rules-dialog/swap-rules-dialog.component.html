@@ -1,0 +1,6 @@
+<div class="mb-dialog-body">
+  <h2 class="mb-title">{{ 'swap.rulesTitle' | t }}</h2>
+  <div class="warn">{{ 'swap.rulesWarn' | t }}</div>
+  <ol><li *ngFor="let r of rules">{{ 'swap.rule' + r | t }}</li></ol>
+  <button type="button" class="mb-btn mb-btn--block" (click)="ref.close(true)">{{ 'common.gotIt' | t }}</button>
+</div>

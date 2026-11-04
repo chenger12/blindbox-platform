@@ -1,0 +1,15 @@
+:host { display: block; margin-top: 14px; }
+.hero { display: grid; grid-template-columns: 1.2fr 1fr; gap: 24px; padding: 26px; align-items: center; overflow: hidden; }
+h1 { font-size: clamp(30px, 5vw, 50px); margin: 6px 0 10px; }
+.btns { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0; }
+.chase { display: grid; grid-template-columns: repeat(3, 84px); gap: 8px; }
+.h-r { max-width: 360px; justify-self: center; width: 100%; }
+.kuji { display: flex; align-items: center; gap: 12px; padding: 18px; text-decoration: none; color: inherit; overflow: hidden; background: linear-gradient(135deg, var(--color-surface), var(--color-surface-2)); }
+.k-txt { flex: 1; min-width: 0; h2 { font-size: 26px; margin: 6px 0; } p { margin: 0 0 12px; } }
+.k-art { width: 140px; flex: none; animation: bob 3s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-6px) rotate(-2deg); } }
+@media (max-width: 700px) {
+  .hero { grid-template-columns: 1fr; padding: 18px; }
+  .h-r { order: -1; max-width: 240px; }
+  .chase { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}

@@ -1,0 +1,12 @@
+:host { display: block; }
+.hub { margin-bottom: 14px; a { text-decoration: none; } }
+.head { display: flex; justify-content: space-between; align-items: center; gap: 12px; p { margin: 0; } }
+.recent { display: flex; align-items: center; gap: 10px; padding: 10px 14px; margin: 14px 0; overflow-x: auto; scrollbar-width: none; }
+.rs { display: flex; align-items: center; gap: 4px; flex: none; font-size: 12px; font-weight: 700; span { display: inline-flex; gap: 3px; align-items: center; } }
+.m { width: 30px; }
+.tools { display: flex; gap: 10px; align-items: center; margin-bottom: 12px; .mb-chips { flex: 1; } }
+.sort { width: 170px; flex: none; }
+.lf { align-self: stretch; margin-top: 8px; display: flex; flex-direction: column; gap: 6px; font-size: 11px; }
+.seller { display: flex; align-items: center; gap: 5px; color: var(--tile-muted, var(--color-text-secondary)); app-avatar { width: 18px; height: 18px; } span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } }
+.price { display: flex; justify-content: space-between; align-items: center; color: var(--tile-ink, var(--color-text-primary)); span { display: inline-flex; gap: 4px; align-items: center; font: 800 14px var(--font-display); } small { color: var(--color-success); font-weight: 700; } small.up { color: var(--color-error); } }
+@media (max-width: 560px) { .tools { flex-direction: column; align-items: stretch; } .sort { width: 100%; } .head { flex-direction: column; align-items: flex-start; } }

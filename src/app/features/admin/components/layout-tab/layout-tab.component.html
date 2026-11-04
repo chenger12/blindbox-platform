@@ -1,0 +1,24 @@
+<div class="tab">
+  <section>
+    <h3>{{ 'admin.layout.title' | t }}</h3>
+    <p class="help">{{ 'admin.layout.help' | t: { template: ('template.' + form.controls.template.value | t) } }}</p>
+    <div class="rows" cdkDropList (cdkDropListDropped)="drop($event)">
+      <div class="row" *ngFor="let s of order; let i = index" cdkDrag>
+        <span class="handle" cdkDragHandle>⋮⋮</span>
+        <span class="n">{{ i + 1 }}</span>
+        <div class="nm"><b>{{ 'section.' + s | t }}</b><small>{{ 'section.' + s + 'Desc' | t }}</small></div>
+        <button mat-button type="button" (click)="remove(s)">{{ 'admin.layout.hide' | t }}</button>
+      </div>
+    </div>
+  </section>
+  <section>
+    <h3>{{ 'admin.layout.available' | t }}</h3>
+    <div class="rows">
+      <div class="row off" *ngFor="let s of hidden">
+        <div class="nm"><b>{{ 'section.' + s | t }}</b><small>{{ 'section.' + s + 'Desc' | t }}</small></div>
+        <button mat-stroked-button type="button" (click)="add(s)">+ {{ 'admin.layout.add' | t }}</button>
+      </div>
+      <p class="help" *ngIf="!hidden.length">{{ 'admin.layout.allUsed' | t }}</p>
+    </div>
+  </section>
+</div>

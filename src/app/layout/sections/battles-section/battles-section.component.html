@@ -1,0 +1,13 @@
+<ng-container *ngIf="registry.isEnabled('battles')">
+  <app-section-header titleKey="home.battles" linkKey="common.seeAll" link="/battles"></app-section-header>
+  <div class="list">
+    <a class="row mb-card" *ngFor="let b of (battles.list$ | async)?.slice(0, 3)" routerLink="/battles">
+      <span class="mode">{{ battles.mode(b.players) }}</span>
+      <span class="boxes">
+        <app-box-art *ngFor="let id of b.rounds" class="mini" [box]="catalog.box(id)!" size="xs"></app-box-art>
+      </span>
+      <span class="cost"><app-coin></app-coin>{{ battles.cost(b) | coins }}</span>
+      <span class="state" [class.live]="b.live">{{ (b.live ? 'battles.live' : 'battles.waiting') | t }}</span>
+    </a>
+  </div>
+</ng-container>

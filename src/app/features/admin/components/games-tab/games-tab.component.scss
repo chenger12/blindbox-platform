@@ -1,0 +1,9 @@
+@use '../admin-tab' as *;
+.hd { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.all { display: flex; gap: 6px; flex: none; }
+.game { flex-wrap: wrap; }
+.n { width: 18px; font-weight: 800; color: var(--admin-muted); font-size: 12px; }
+.ic { width: 34px; height: 34px; border-radius: 9px; background: var(--admin-bg); display: grid; place-items: center; color: var(--admin-ink); }
+.ic ::ng-deep svg { width: 22px; height: 22px; }
+.nm { flex: 1; min-width: 120px; display: flex; flex-direction: column; b { font-size: 14px; } small { font-size: 11px; color: var(--admin-muted); } }
+.f { flex-direction: row; align-items: center; gap: 6px; select { height: 32px; } }

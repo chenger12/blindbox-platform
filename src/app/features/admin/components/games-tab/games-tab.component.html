@@ -1,0 +1,31 @@
+<div class="tab">
+  <section>
+    <div class="hd">
+      <div><h3>{{ 'admin.games.title' | t }}</h3><p class="help">{{ 'admin.games.help' | t }}</p></div>
+      <div class="all">
+        <button mat-stroked-button type="button" (click)="setAll(true)">{{ 'admin.games.showAll' | t }}</button>
+        <button mat-stroked-button type="button" (click)="setAll(false)">{{ 'admin.games.hideAll' | t }}</button>
+      </div>
+    </div>
+    <div class="rows" cdkDropList (cdkDropListDropped)="drop($event)">
+      <div class="row game" *ngFor="let g of games.controls; let i = index" cdkDrag [class.off]="!g.controls.enabled.value" [formGroup]="g">
+        <span class="handle" cdkDragHandle>⋮⋮</span>
+        <span class="n">{{ i + 1 }}</span>
+        <span class="ic" [innerHTML]="icon(g.controls.id.value)"></span>
+        <div class="nm"><b>{{ meta(g.controls.id.value).nameKey | t }}</b><small>{{ meta(g.controls.id.value).route }}</small></div>
+        <label class="f">{{ 'admin.games.badge' | t }}
+          <select formControlName="badge"><option *ngFor="let b of badges" [value]="b">{{ 'badge.' + b | t }}</option></select>
+        </label>
+        <label class="f">{{ 'admin.games.style' | t }}
+          <select formControlName="styleOverride">
+            <option [ngValue]="null">{{ 'admin.games.followSite' | t }}</option>
+            <optgroup *ngFor="let r of regions" [label]="'region.' + r | t">
+              <option *ngFor="let p of presetsIn(r)" [ngValue]="p.id">{{ p.nameKey | t }}</option>
+            </optgroup>
+          </select>
+        </label>
+        <mat-slide-toggle formControlName="enabled">{{ (g.controls.enabled.value ? 'admin.games.on' : 'admin.games.off') | t }}</mat-slide-toggle>
+      </div>
+    </div>
+  </section>
+</div>

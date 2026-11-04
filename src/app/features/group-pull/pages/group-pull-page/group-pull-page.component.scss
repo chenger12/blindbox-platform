@@ -1,0 +1,27 @@
+:host { display: block; }
+.room { display: flex; align-items: center; gap: 12px; padding: 14px; margin-bottom: 10px; }
+.ri { flex: 1; min-width: 0; h4 { font-size: 17px; } small { font-size: 12px; color: var(--color-text-secondary); } }
+.seats-s { display: flex; gap: 4px; margin: 6px 0; app-avatar { width: 26px; height: 26px; } i { width: 26px; height: 26px; border-radius: 50%; border: 1.5px dashed var(--color-border); display: grid; place-items: center; font-style: normal; font-size: 14px; color: var(--color-text-secondary); } }
+.bonus { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 70px; font-size: 10px; color: var(--color-text-secondary); text-align: center; app-prize-art { width: 44px; } }
+.lose { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; font-size: 12.5px; }
+.arena { position: relative; }
+.status { text-align: center; font-size: 20px; margin: 4px 0 14px; }
+.seats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.seat { position: relative; padding: 14px 10px; display: flex; flex-direction: column; align-items: center; gap: 6px; transition: transform .3s, box-shadow .3s; }
+.seat.empty { opacity: .5; }
+.seat.me { border-color: var(--color-primary); }
+.crown { position: absolute; top: -10px; padding: 2px 8px; border-radius: 6px; background: var(--tier-gold); color: var(--tier-ink-dark); font: 900 10px var(--font-display); letter-spacing: .1em; opacity: 0; transition: opacity .3s; }
+.seat[data-state='lead'] .crown, .seat[data-state='win'] .crown { opacity: 1; }
+.seat[data-state='win'] { transform: scale(1.04); box-shadow: 0 0 0 2px var(--tier-gold), 0 0 30px color-mix(in srgb, var(--tier-gold) 40%, transparent); }
+.seat[data-state='lose'] { opacity: .6; }
+.av { width: 44px; height: 44px; }
+.nm { font-weight: 700; font-size: 13px; }
+.slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; width: 100%; }
+.slot { position: relative; aspect-ratio: 1; border-radius: 10px; background: var(--color-surface-2); display: grid; place-items: center; color: var(--color-text-secondary); font-weight: 800; }
+.slot.on { background: var(--tile-bg); animation: pop .4s cubic-bezier(.2, 1.6, .4, 1); }
+.slot.rare { box-shadow: 0 0 0 2px var(--tier-gold); }
+.slot app-prize-art { width: 80%; }
+.v { position: absolute; bottom: 1px; right: 4px; font-size: 9px; color: var(--tile-ink, var(--color-text-primary)); }
+.tot { font-size: 12px; color: var(--color-text-secondary); b { font: 800 16px var(--font-display); color: var(--color-text-primary); } }
+.cd { position: fixed; inset: 0; display: grid; place-items: center; pointer-events: none; z-index: 900; span { font: 900 110px var(--font-display); color: var(--color-primary); text-shadow: 0 6px 30px #0008; animation: pop .6s; } }
+@keyframes pop { from { transform: scale(.3); opacity: 0; } }

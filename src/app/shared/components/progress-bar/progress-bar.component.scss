@@ -1,0 +1,5 @@
+:host { display: block; }
+.bar { height: 8px; border-radius: 99px; background: var(--color-surface-2); overflow: hidden; border: 1px solid var(--color-border); }
+i { display: block; height: 100%; width: var(--w, 0%); background: var(--btn-bg); border-radius: inherit; transition: width .5s cubic-bezier(.2,.8,.2,1); }
+.bar[data-tone='gold'] i { background: linear-gradient(90deg, var(--tier-gold), var(--coin-hi)); }
+.bar[data-tone='success'] i { background: var(--color-success); }

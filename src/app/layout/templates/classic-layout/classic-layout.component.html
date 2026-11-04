@@ -1,0 +1,4 @@
+<div class="classic">
+  <app-ticker></app-ticker>
+  <app-home-section *ngFor="let id of order" [sectionId]="id" class="sec" [attr.data-sec]="id"></app-home-section>
+</div>

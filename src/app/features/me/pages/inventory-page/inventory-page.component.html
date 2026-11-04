@@ -1,0 +1,47 @@
+<div class="mb-wrap page" *ngIf="view$ | async as v">
+  <app-me-tabs></app-me-tabs>
+  <div class="sum">
+    <div><b>{{ v.list.length }}</b><span>{{ 'me.items' | t }}</span></div>
+    <div><b><app-coin></app-coin>{{ v.total | coins }}</b><span>{{ 'me.value' | t }}</span></div>
+  </div>
+  <form class="tools" [formGroup]="form">
+    <select class="mb-select" formControlName="sort">
+      <option value="value">{{ 'me.sortValue' | t }}</option>
+      <option value="new">{{ 'me.sortNew' | t }}</option>
+    </select>
+    <select class="mb-select" formControlName="filter">
+      <option *ngFor="let f of filters" [value]="f">{{ 'source.' + f | t }}</option>
+    </select>
+  </form>
+  <div class="acts">
+    <button type="button" class="mb-btn mb-btn--ghost mb-btn--sm" (click)="selectAll()">{{ 'me.selectAll' | t }}</button>
+    <button type="button" class="mb-btn mb-btn--ghost mb-btn--sm" (click)="clear()">{{ 'me.clear' | t }}</button>
+    <span class="grow"></span>
+    <button type="button" class="mb-btn mb-btn--sm" [disabled]="!selected.size" (click)="sell()">
+      {{ 'me.sell' | t }}<ng-container *ngIf="selected.size"> {{ selected.size }} · <app-coin></app-coin>{{ v.selectedValue * 0.8 | coins }}</ng-container>
+    </button>
+    <button type="button" class="mb-btn mb-btn--ghost mb-btn--sm" [disabled]="selected.size !== 1" (click)="list()">{{ 'me.listMarket' | t }}</button>
+    <button type="button" class="mb-btn mb-btn--ghost mb-btn--sm" [disabled]="!selected.size" (click)="ship()">{{ 'me.ship' | t }}</button>
+  </div>
+  <div class="mb-grid-items" *ngIf="v.list.length; else empty">
+    <button type="button" class="cell" *ngFor="let e of v.list" (click)="toggle(e)">
+      <app-item-tile [itemId]="e.itemId" [tier]="e.tier" [selected]="selected.has(e.uid)">
+        <span class="lock" *ngIf="e.locked">{{ (e.locked === 'market' ? 'me.listed' : 'me.inTrade') | t }}</span>
+        <span class="chk" *ngIf="!e.locked">{{ selected.has(e.uid) ? '✓' : '' }}</span>
+      </app-item-tile>
+    </button>
+  </div>
+  <ng-template #empty>
+    <app-empty-state titleKey="me.emptyTitle" textKey="me.emptyText">
+      <a class="mb-btn" routerLink="/boxes">{{ 'common.browseBoxes' | t }}</a>
+    </app-empty-state>
+  </ng-template>
+  <app-section-header titleKey="me.codex"></app-section-header>
+  <div class="codex mb-card">
+    <div class="cx" *ngFor="let c of codex">
+      <div class="h"><b>{{ c.key | t }}</b><span>{{ codexCount(c.ids) }}/{{ c.ids.length }}</span></div>
+      <app-progress-bar [value]="codexCount(c.ids) / c.ids.length" tone="gold"></app-progress-bar>
+    </div>
+  </div>
+  <p class="mb-muted note">{{ 'me.note' | t }}</p>
+</div>

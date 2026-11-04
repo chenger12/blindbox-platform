@@ -1,0 +1,13 @@
+<div class="live">
+  <div class="lbl"><span class="dot"></span>{{ 'home.liveDrops' | t }}</div>
+  <div class="strip">
+    <div class="drop" *ngFor="let d of feed.drops$ | async; trackBy: track" [title]="d.itemId | itemName">
+      <app-item-tile [itemId]="d.itemId" size="xs" [showName]="false"></app-item-tile>
+    </div>
+  </div>
+</div>
+<div class="stats">
+  <div><b>{{ feed.openedToday$ | async | coins }}</b><span>{{ 'home.statOpened' | t }}</span></div>
+  <div><b><app-coin></app-coin>1,800</b><span>{{ 'home.statBiggest' | t }}</span></div>
+  <div><b>{{ feed.online$ | async | coins }}</b><span>{{ 'home.statOnline' | t }}</span></div>
+</div>

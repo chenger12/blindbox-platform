@@ -1,0 +1,78 @@
+<div class="show" [class.quake]="quake" (click)="tap()">
+  <button type="button" class="skip" (click)="skip(); $event.stopPropagation()">{{ 'kuji.skip' | t }}</button>
+  <div class="flash" *ngIf="flash" [attr.data-n]="flash"></div>
+
+  <ng-container [ngSwitch]="stage">
+    <div class="machine" *ngSwitchCase="'machine'">
+      <div class="km">
+        <div class="sign"><b>{{ (theme.config$ | async)?.siteName }}</b><span>{{ 'kuji.machineSub' | t }}</span></div>
+        <div class="panel">
+          <div class="slot"><div class="ball" *ngIf="ball" [attr.data-ball]="ball" [attr.data-state]="ballState"><i></i></div></div>
+          <div class="knob" [class.turn]="knob"></div>
+          <div class="coin-slot"></div>
+        </div>
+        <div class="feet"><i></i><i></i></div>
+      </div>
+      <div class="hint">
+        <ng-container *ngIf="hintKey; else pressStart">
+          <b *ngIf="upgraded" class="upg">{{ 'kuji.upgrade' | t }}</b> {{ hintKey | t }}
+        </ng-container>
+        <ng-template #pressStart>{{ (trial ? 'kuji.trialPrefix' : '') | t }}{{ 'kuji.pressStart' | t: { n: pulls.length } }}</ng-template>
+      </div>
+      <button type="button" class="start" [class.gone]="knob" (click)="press('start', $event)">START</button>
+    </div>
+
+    <div class="zoom" *ngSwitchCase="'zoom'">
+      <div class="rays" [attr.data-ball]="ball"></div>
+      <div class="big-ball" [attr.data-ball]="ball"><i></i></div>
+      <div class="tip">{{ 'kuji.tapContinue' | t }}</div>
+    </div>
+
+    <div class="jackpot" *ngSwitchCase="'jackpot'" [attr.data-tier]="best.tier">
+      <div class="lines"></div>
+      <div class="band"></div>
+      <app-prize-art class="j-art" [itemId]="best.itemId" gameId="kuji"></app-prize-art>
+      <div class="j-txt">JACKPOT!!</div>
+      <div class="j-sub">{{ 'kuji.jackpot.' + best.tier | t }}</div>
+    </div>
+
+    <div class="bulk" *ngSwitchCase="'bulk'">
+      <b>{{ 'kuji.bulk' | t: { n: countLabel } }}</b>
+      <small>{{ 'kuji.bestLast' | t }}</small>
+    </div>
+
+    <div class="rc" *ngSwitchCase="'card'">
+      <ng-container *ngTemplateOutlet="cardTpl; context: { $implicit: card, mode: 'quick' }"></ng-container>
+      <div class="tip">{{ 'kuji.tapNext' | t }}</div>
+    </div>
+
+    <div class="suspense" *ngSwitchCase="'suspense'">
+      <div class="s-txt">{{ (pulls.length > 1 ? 'kuji.lastOne' : 'kuji.revealing') | t }}</div>
+      <div class="s-card" [attr.data-tier]="best.tier"><div class="s-in"></div></div>
+    </div>
+
+    <div class="rc final" *ngSwitchCase="'final'">
+      <ng-container *ngTemplateOutlet="cardTpl; context: { $implicit: card, mode: 'final' }"></ng-container>
+      <div class="acts" *ngIf="pulls.length === 1; else more">
+        <button *ngIf="againKey" type="button" class="mb-btn mb-btn--ghost" (click)="press('again', $event)">{{ againKey | t }}</button>
+        <button type="button" class="mb-btn mb-btn--gold" (click)="press('ok', $event)">{{ (trial ? 'result.playReal' : 'kuji.collect') | t }}</button>
+      </div>
+      <ng-template #more>
+        <div class="acts"><button type="button" class="mb-btn mb-btn--gold" (click)="press('more', $event)">{{ 'kuji.seeAll' | t: { n: pulls.length } }}</button></div>
+      </ng-template>
+    </div>
+  </ng-container>
+</div>
+
+<ng-template #cardTpl let-c let-mode="mode">
+  <div class="card-wrap" [attr.data-mode]="mode">
+    <div class="bg" [attr.data-tier]="c.tier"></div>
+    <div class="count" *ngIf="countLabel">{{ countLabel }}</div>
+    <div class="cardx">
+      <app-tier-tag [tier]="c.tier"></app-tier-tag>
+      <app-prize-art [itemId]="c.itemId" gameId="kuji"></app-prize-art>
+    </div>
+    <div class="nm">{{ c.itemId | itemName }}</div>
+    <div class="tr">{{ 'tier.' + c.tier | t }} · {{ 'kuji.valueN' | t: { n: value(c) } }}</div>
+  </div>
+</ng-template>

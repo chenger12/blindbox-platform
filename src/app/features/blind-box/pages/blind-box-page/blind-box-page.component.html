@@ -1,0 +1,73 @@
+<app-game-frame gameId="blindBox">
+  <ng-container *ngIf="bb.state$ | async as s">
+    <section class="hero mb-card">
+      <app-prize-art class="cover" itemId="pj_ye" gameId="blindBox"></app-prize-art>
+      <div>
+        <div class="mb-eyebrow">{{ 'blindBox.series' | t }}</div>
+        <h2 class="mb-title">{{ 'blindBox.caseN' | t: { n: s.caseNo } }}</h2>
+        <p class="mb-muted">{{ 'blindBox.left' | t: { n: bb.remaining() } }} · <app-coin></app-coin>{{ price }}</p>
+        <div class="cards">
+          <span>{{ 'blindBox.hints' | t }} <b>{{ (wallet.state$ | async)?.hintCards }}</b></span>
+          <span>{{ 'blindBox.xrays' | t }} <b>{{ (wallet.state$ | async)?.xrayCards }}</b></span>
+        </div>
+      </div>
+    </section>
+
+    <div class="case">
+      <button type="button" *ngFor="let slot of s.slots; let i = index" class="bb" [mbVars]="{ '--bb': color(i) }"
+        [class.sold]="slot.sold" [class.mine]="slot.sold === 1" [class.sel]="i === s.selected" [class.xr]="slot.xray && !slot.sold" [class.shake]="shaking === i"
+        (click)="tapSlot(i, slot)">
+        <span class="no">{{ i + 1 }}</span>
+        <ng-container *ngIf="slot.sold || slot.xray; else logo">
+          <app-prize-art class="art" [class.ghost]="!slot.sold" [itemId]="slot.itemId" gameId="blindBox"></app-prize-art>
+          <em *ngIf="slot.sold">{{ (slot.sold === 1 ? 'blindBox.mine' : 'blindBox.sold') | t }}</em>
+        </ng-container>
+        <ng-template #logo><span class="logo">{{ (theme$ | async)?.siteName }}</span></ng-template>
+      </button>
+    </div>
+
+    <div class="panel mb-card">
+      <ng-container *ngIf="selected as sel; else pickOne">
+        <h3 class="mb-title">{{ 'blindBox.boxN' | t: { n: s.selected + 1 } }}
+          <span>{{ sel.xray ? ('blindBox.xrayed' | t) : ('blindBox.possible' | t: { n: bb.possible(s.selected).length }) }}</span>
+        </h3>
+        <div class="acts">
+          <button type="button" class="mb-btn mb-btn--ghost" [disabled]="sel.xray" (click)="hint()">{{ 'blindBox.hint' | t }}<small>{{ (wallet.state$ | async)?.hintCards ? ('blindBox.cardsLeft' | t: { n: (wallet.state$ | async)?.hintCards ?? 0 }) : ('blindBox.each' | t: { n: hintPrice }) }}</small></button>
+          <button type="button" class="mb-btn mb-btn--ghost" [disabled]="sel.xray" (click)="xray()">{{ 'blindBox.xray' | t }}<small>{{ (wallet.state$ | async)?.xrayCards ? ('blindBox.cardsLeft' | t: { n: (wallet.state$ | async)?.xrayCards ?? 0 }) : ('blindBox.each' | t: { n: xrayPrice }) }}</small></button>
+          <button type="button" class="mb-btn mb-btn--ghost" [disabled]="sel.shaken || sel.xray" (click)="shake()">{{ 'blindBox.shake' | t }}<small>{{ (sel.shaken ? 'blindBox.used' : 'blindBox.freeOnce') | t }}</small></button>
+        </div>
+        <div class="buy">
+          <button type="button" class="mb-btn mb-btn--ghost" (click)="another()">{{ 'blindBox.another' | t }}</button>
+          <button type="button" class="mb-btn" [disabled]="busy" (click)="buy(false)">{{ 'blindBox.buyThis' | t }} · <app-coin></app-coin>{{ price }}</button>
+        </div>
+        <div class="log">
+          <div *ngFor="let l of sel.log">{{ l.key | t: { item: (l.itemId | itemName), ear: ('blindBox.ear.' + l.ear | t) } }}</div>
+        </div>
+      </ng-container>
+      <ng-template #pickOne>
+        <p class="pick">{{ 'blindBox.tapToInspect' | t }}<small>{{ 'blindBox.tapHint' | t }}</small></p>
+      </ng-template>
+    </div>
+
+    <div class="row">
+      <button type="button" class="mb-btn mb-btn--ghost mb-btn--sm" (click)="newCase()">{{ 'blindBox.newCase' | t }}</button>
+      <button type="button" class="mb-btn mb-btn--sm" [disabled]="!bb.remaining() || busy" (click)="buy(true)">{{ 'blindBox.buyCase' | t: { n: bb.remaining() } }} · <app-coin></app-coin>{{ caseCost() | coins }}</button>
+    </div>
+
+    <app-section-header titleKey="blindBox.styles"></app-section-header>
+    <div class="styles">
+      <div class="st" *ngFor="let id of bb.styles" [attr.data-state]="styleClass(id)">
+        <app-tier-tag *ngIf="id === secret" tier="SECRET" [short]="true"></app-tier-tag>
+        <app-prize-art [itemId]="id" gameId="blindBox"></app-prize-art>
+      </div>
+    </div>
+  </ng-container>
+</app-game-frame>
+
+<div class="unbox" *ngIf="unbox" (click)="tapUnbox()">
+  <div class="ub" [class.open]="unbox.open" [mbVars]="{ '--bb': unbox.color }">
+    <div class="rays"></div>
+    <div class="box"><div class="lid"></div><div class="body">{{ (theme$ | async)?.siteName }}</div></div>
+    <div class="tip">{{ 'blindBox.tapOpen' | t }}</div>
+  </div>
+</div>

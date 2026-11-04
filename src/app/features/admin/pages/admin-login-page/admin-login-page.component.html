@@ -1,0 +1,20 @@
+<div class="wrap">
+  <form class="card" [formGroup]="form" (ngSubmit)="submit()">
+    <div class="logo">BO</div>
+    <h1>{{ 'admin.loginTitle' | t }}</h1>
+    <p class="sub">{{ 'admin.loginSub' | t }}</p>
+    <label for="bo-user">{{ 'admin.username' | t }}</label>
+    <input id="bo-user" formControlName="username" autocomplete="username" />
+    <label for="bo-pass">{{ 'admin.password' | t }}</label>
+    <input id="bo-pass" type="password" formControlName="password" autocomplete="current-password" />
+    <p class="err" *ngIf="error">{{ 'admin.loginError' | t }}</p>
+    <button type="submit" mat-flat-button color="primary" [disabled]="form.invalid || busy">{{ 'admin.login' | t }}</button>
+    <p class="hint">{{ 'admin.demoCreds' | t }} <code>admin</code> / <code>admin123</code></p>
+    <div class="foot">
+      <select [value]="i18n.lang" (change)="setLang($any($event.target).value)">
+        <option *ngFor="let l of i18n.languages" [value]="l.code">{{ l.label }}</option>
+      </select>
+      <a routerLink="/">{{ 'admin.backToSite' | t }}</a>
+    </div>
+  </form>
+</div>

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Blind Box</string>
+    <string name="title_activity_main">Blind Box</string>
+    <string name="package_name">com.yourbrand.blindbox</string>
+    <string name="custom_url_scheme">com.yourbrand.blindbox</string>
+</resources>

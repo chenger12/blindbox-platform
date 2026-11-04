@@ -1,0 +1,12 @@
+:host { display: block; color: var(--color-text-primary); }
+:host(.scoped) { background: var(--color-bg); background-image: var(--bg-image); font-family: var(--font-body); padding: 1px 0 24px; border-radius: 0; }
+.frame { max-width: 760px; margin: 0 auto; padding: 0 16px 32px; }
+.frame.wide { max-width: 1120px; }
+.head { display: flex; align-items: flex-end; gap: 12px; padding: 18px 0 14px; }
+.ttl { flex: 1; min-width: 0; }
+h1 { font-size: 26px; margin: 2px 0 0; }
+.back { font-size: 13px; font-weight: 700; color: var(--color-text-secondary); text-decoration: none; align-self: flex-start; white-space: nowrap; }
+.how { padding: 14px 18px; margin-bottom: 16px; font-size: 13.5px; line-height: 1.55; p { margin: 0 0 6px; color: var(--color-text-secondary); } ol { margin: 0; padding-left: 18px; } }
+.others { margin-top: 28px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+@media (max-width: 560px) { .head { flex-wrap: wrap; } .back { width: 100%; } h1 { font-size: 22px; } }

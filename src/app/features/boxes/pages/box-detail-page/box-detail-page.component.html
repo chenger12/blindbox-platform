@@ -1,0 +1,32 @@
+<app-game-frame gameId="boxes" [wide]="true" *ngIf="box">
+  <a class="back" routerLink="/boxes">← {{ 'boxes.allBoxes' | t }}</a>
+  <div class="top">
+    <app-box-art class="art" [box]="box" size="lg"></app-box-art>
+    <div class="info">
+      <div class="mb-eyebrow">{{ 'boxes.eyebrow' | t: { n: box.itemIds.length } }}</div>
+      <h2 class="mb-title">{{ 'box.' + box.id + '.name' | t }}</h2>
+      <p class="mb-muted">{{ 'box.' + box.id + '.desc' | t }}</p>
+      <div class="cnt" *ngIf="!free">
+        <button type="button" *ngFor="let n of counts" class="mb-chip" [class.on]="form.controls.count.value === n" (click)="setCount(n)">{{ n }}×</button>
+      </div>
+      <div class="row">
+        <button type="button" class="mb-btn mb-btn--lg" [disabled]="busy" (click)="open(false)">
+          <ng-container *ngIf="free; else paid">{{ 'boxes.openFree' | t }}</ng-container>
+          <ng-template #paid>{{ 'boxes.openFor' | t }} <app-coin></app-coin>{{ cost | coins }}</ng-template>
+        </button>
+        <button type="button" class="mb-btn mb-btn--ghost mb-btn--lg" [disabled]="busy" (click)="open(true)">{{ 'boxes.demo' | t }}</button>
+      </div>
+      <form [formGroup]="form"><label class="quick"><input type="checkbox" formControlName="quick" /> {{ 'boxes.quick' | t }}</label></form>
+      <div class="ev">{{ 'boxes.ev' | t }} <app-coin></app-coin>{{ ev | coins }} · {{ 'boxes.top' | t }} <app-coin></app-coin>{{ box.maxValue | coins }}</div>
+    </div>
+  </div>
+  <div class="reels">
+    <app-reel *ngFor="let w of winners" [box]="box" [winner]="w" [idle]="idle" axis="h"></app-reel>
+  </div>
+  <app-section-header titleKey="boxes.inside">
+    <span class="mb-muted">{{ 'boxes.oddsPer' | t }}</span>
+  </app-section-header>
+  <div class="mb-grid-items">
+    <app-item-tile *ngFor="let o of odds" [itemId]="o.itemId" [odds]="o.odds"></app-item-tile>
+  </div>
+</app-game-frame>

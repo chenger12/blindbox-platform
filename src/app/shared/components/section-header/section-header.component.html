@@ -1,0 +1,8 @@
+<div class="sh">
+  <div>
+    <div class="mb-eyebrow" *ngIf="eyebrowKey">{{ eyebrowKey | t }}</div>
+    <h2 class="mb-title">{{ titleKey | t }}</h2>
+  </div>
+  <ng-content></ng-content>
+  <a *ngIf="link && linkKey" class="more" [routerLink]="link">{{ linkKey | t }} →</a>
+</div>

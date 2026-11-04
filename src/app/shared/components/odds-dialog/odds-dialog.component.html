@@ -1,0 +1,13 @@
+<div class="mb-dialog-body">
+  <h2 class="mb-title">{{ title }}</h2>
+  <table>
+    <tr><th *ngFor="let h of d.headKeys">{{ h | t }}</th></tr>
+    <tr *ngFor="let r of d.rows">
+      <td><app-tier-tag *ngIf="r.tier" [tier]="r.tier"></app-tier-tag><span *ngIf="r.labelKey">{{ r.labelKey | t }}</span></td>
+      <td>{{ r.left }}</td>
+      <td>{{ r.odds }}</td>
+    </tr>
+  </table>
+  <p *ngFor="let n of d.noteKeys" class="note">{{ n | t: d.noteParams ?? null }}</p>
+  <button type="button" class="mb-btn mb-btn--block" (click)="ref.close()">{{ 'common.gotIt' | t }}</button>
+</div>

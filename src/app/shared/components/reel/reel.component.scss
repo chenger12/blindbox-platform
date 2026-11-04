@@ -1,0 +1,17 @@
+:host { display: block; }
+.reel { position: relative; overflow: hidden; border-radius: var(--card-radius); background: var(--color-surface); border: var(--card-border); }
+.track { display: flex; gap: 8px; padding: 10px; will-change: transform; }
+.track.settle { transition: transform .4s cubic-bezier(.3, 1.5, .5, 1); }
+.cell { flex: none; width: 96px; transition: transform .3s, opacity .3s; }
+.reel[data-axis='h'] { height: 136px; }
+.reel[data-axis='v'] { height: 300px; .track { flex-direction: column; } .cell { width: 100%; } }
+.mark { position: absolute; pointer-events: none; background: var(--color-primary); box-shadow: 0 0 14px var(--color-primary); }
+.reel[data-axis='h'] .mark { top: 0; bottom: 0; left: 50%; width: 2px; transform: translateX(-1px); }
+.reel[data-axis='v'] .mark { left: 0; right: 0; top: 50%; height: 2px; transform: translateY(-1px); }
+.reel::before, .reel::after { content: ''; position: absolute; z-index: 1; pointer-events: none; }
+.reel[data-axis='h']::before { inset: 0 auto 0 0; width: 60px; background: linear-gradient(90deg, var(--color-surface), transparent); }
+.reel[data-axis='h']::after { inset: 0 0 0 auto; width: 60px; background: linear-gradient(-90deg, var(--color-surface), transparent); }
+.reel.done .cell:not(.win) { opacity: .35; }
+.reel.done .cell.win { transform: scale(1.08); }
+.reel.idle .track { animation: drift 40s linear infinite; }
+@keyframes drift { to { transform: translateX(-50%); } }

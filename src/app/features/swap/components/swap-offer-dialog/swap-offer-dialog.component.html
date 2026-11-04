@@ -1,0 +1,25 @@
+<div class="mb-dialog-body">
+  <h2 class="mb-title">{{ 'swap.offerTo' | t: { user: post.author } }}</h2>
+  <ng-container *ngIf="mine.length; else none">
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <label class="mb-label">{{ 'swap.step1' | t }}</label>
+      <div class="pick">
+        <button type="button" *ngFor="let id of post.give" (click)="form.controls.want.setValue(id)"><app-item-tile [itemId]="id" size="sm" [selected]="form.controls.want.value === id"></app-item-tile></button>
+      </div>
+      <label class="mb-label">{{ 'swap.step2' | t }}</label>
+      <div class="pick scroll">
+        <button type="button" *ngFor="let e of mine" (click)="toggle(e.uid)"><app-item-tile [itemId]="e.itemId" size="xs" [selected]="form.controls.uids.value.includes(e.uid)" [dim]="!form.controls.uids.value.includes(e.uid) && form.controls.uids.value.length >= 3"></app-item-tile></button>
+      </div>
+      <div class="val">
+        <span>{{ 'swap.theirItem' | t }} <b>{{ wantValue }}</b></span>
+        <span>{{ 'swap.youGive' | t }} <b [class.ok]="sum >= wantValue * 0.8">{{ sum }}</b></span>
+      </div>
+      <button class="mb-btn mb-btn--block" type="submit" [disabled]="!form.controls.uids.value.length">{{ 'swap.sendOffer' | t }}</button>
+      <p class="note">{{ 'swap.offerNote' | t }}</p>
+    </form>
+  </ng-container>
+  <ng-template #none>
+    <p class="mb-muted">{{ 'swap.nothingTitle' | t }}</p>
+    <a class="mb-btn mb-btn--block" routerLink="/boxes" (click)="ref.close()">{{ 'common.browseBoxes' | t }}</a>
+  </ng-template>
+</div>

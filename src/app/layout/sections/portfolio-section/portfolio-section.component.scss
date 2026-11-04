@@ -1,0 +1,12 @@
+:host { display: block; margin-top: 16px; }
+.pf { padding: 18px; }
+.hd { display: flex; justify-content: space-between; gap: 12px; }
+.val { display: flex; align-items: center; gap: 8px; font: var(--title-weight) 36px/1.1 var(--font-display); margin-top: 6px; }
+.chg { font-size: 13px; font-weight: 700; color: var(--color-error); margin-top: 4px; }
+.chg.up { color: var(--color-success); }
+.best { width: 72px; }
+.chart { width: 100%; height: 110px; margin-top: 12px; display: block; }
+.line { fill: none; stroke: var(--color-primary); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.area { fill: color-mix(in srgb, var(--color-primary) 16%, transparent); }
+.note { font-size: 11.5px; color: var(--color-text-secondary); margin: 8px 0 12px; }
+.btns { display: flex; gap: 8px; }
