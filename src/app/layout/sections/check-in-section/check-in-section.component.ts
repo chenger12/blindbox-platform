@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { AccountService } from '../../../services/account/account.service';
 import { DailyService, CHECK_IN_REWARDS } from '../../../services/daily/daily.service';
 import { FxService } from '../../../services/fx/fx.service';
 import { ToastService } from '../../../services/toast/toast.service';
@@ -11,10 +12,10 @@ import { ToastService } from '../../../services/toast/toast.service';
 export class CheckInSectionComponent {
   readonly rewards = CHECK_IN_REWARDS;
 
-  constructor(readonly daily: DailyService, private readonly toast: ToastService, private readonly fx: FxService) {}
+  constructor(readonly daily: DailyService, private readonly account: AccountService, private readonly toast: ToastService, private readonly fx: FxService) {}
 
-  claim(): void {
-    const got = this.daily.checkIn();
-    if (got) { this.toast.show('home.checkInToast', { n: got }); this.fx.confetti(60); }
+  async claim(): Promise<void> {
+    const r = await this.account.checkIn();
+    if (r) { this.toast.show('home.checkInToast', { n: r.coins }); this.fx.confetti(60); }
   }
 }

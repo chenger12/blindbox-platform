@@ -1,9 +1,10 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { gameEnabledGuard } from './utils/game-enabled.guard';
+import { gameStateResolver } from './utils/game-state.resolver';
 
 const game = (path: string, gameId: string, load: Routes[number]['loadChildren']): Routes[number] =>
-  ({ path, loadChildren: load, canActivate: [gameEnabledGuard], data: { gameId } });
+  ({ path, loadChildren: load, canActivate: [gameEnabledGuard], resolve: { state: gameStateResolver }, data: { gameId } });
 
 const routes: Routes = [
   { path: 'admin', loadChildren: () => import('./features/admin/admin.module').then(m => m.AdminModule) },

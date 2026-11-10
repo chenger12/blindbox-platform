@@ -8,7 +8,6 @@ import { CatalogService } from '../../../../services/catalog/catalog.service';
 import { DialogService } from '../../../../services/dialog/dialog.service';
 import { GameRegistryService } from '../../../../services/game-registry/game-registry.service';
 import { I18nService } from '../../../../services/i18n/i18n.service';
-import { InventoryService } from '../../../../services/inventory/inventory.service';
 import { ResultService } from '../../../../services/result/result.service';
 import { SwapService } from '../../../../services/swap/swap.service';
 import { ToastService } from '../../../../services/toast/toast.service';
@@ -45,7 +44,6 @@ export class SwapPageComponent implements OnInit, OnDestroy {
     readonly registry: GameRegistryService,
     readonly wallet: WalletService,
     private readonly catalog: CatalogService,
-    private readonly inventory: InventoryService,
     private readonly dialogs: DialogService,
     private readonly results: ResultService,
     private readonly toast: ToastService,
@@ -72,10 +70,7 @@ export class SwapPageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     if (!this.swap.state.rulesRead) { setTimeout(() => this.rules(), 300); }
-    this.sub = this.swap.received$.subscribe(itemId => {
-      const e = this.inventory.entries.find(x => x.itemId === itemId);
-      void this.results.show({ items: [{ itemId, uid: e?.uid }], allowSell: false });
-    });
+    this.sub = this.swap.received$.subscribe(item => void this.results.show({ items: [item], allowSell: false }));
   }
 
   ngOnDestroy(): void {
@@ -87,18 +82,18 @@ export class SwapPageComponent implements OnInit, OnDestroy {
   }
 
   create(): void {
-    this.dialogs.open<SwapCreateDialogComponent, unknown, CreatePostResult>(SwapCreateDialogComponent, { panel: { maxWidth: 520 } }).afterClosed().subscribe(r => {
-      if (r && this.swap.createPost(r.uids, r.want, r.note)) {
+    this.dialogs.open<SwapCreateDialogComponent, unknown, CreatePostResult>(SwapCreateDialogComponent, { panel: { maxWidth: 520 } }).afterClosed().subscribe(async r => {
+      if (r && await this.swap.createPost(r.uids, r.want, r.note)) {
         this.toast.show('swap.listed');
         this.form.patchValue({ main: 'board', sub: 'mine' });
       }
     });
   }
 
-  onAction(a: PostAction): void {
+  async onAction(a: PostAction): Promise<void> {
     if (a.type === 'offer') {
-      this.dialogs.open<SwapOfferDialogComponent, SwapPost, OfferResult>(SwapOfferDialogComponent, { data: a.post, panel: { maxWidth: 520 } }).afterClosed().subscribe(r => {
-        if (r) { this.swap.makeOffer(a.post.id, r.want, r.uids); this.toast.show('swap.offerSentToast', { user: a.post.author }); }
+      this.dialogs.open<SwapOfferDialogComponent, SwapPost, OfferResult>(SwapOfferDialogComponent, { data: a.post, panel: { maxWidth: 520 } }).afterClosed().subscribe(async r => {
+        if (r && await this.swap.makeOffer(a.post.id, r.want, r.uids)) { this.toast.show('swap.offerSentToast', { user: a.post.author }); }
       });
     } else if (a.type === 'block') {
       this.swap.block(a.post.author);
@@ -107,11 +102,8 @@ export class SwapPageComponent implements OnInit, OnDestroy {
       this.swap.unlist(a.post.id);
       this.toast.show('swap.unlistedToast');
     } else if (a.type === 'accept') {
-      const got = this.swap.acceptOffer(a.post.id, a.index);
-      if (got) {
-        const e = this.inventory.entries.find(x => x.itemId === got);
-        void this.results.show({ items: [{ itemId: got, uid: e?.uid }], allowSell: false });
-      }
+      const got = await this.swap.acceptOffer(a.post.id, a.index);
+      if (got) { void this.results.show({ items: [got], allowSell: false }); }
     } else if (a.type === 'decline') {
       this.swap.declineOffer(a.post.id, a.index);
     }

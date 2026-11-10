@@ -1,28 +1,41 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { ClawFinishResult, ClawGrabResult, ClawStartResult, ClawStateView } from '../../models/api/api.model';
 import { CLAW_PITY } from '../../utils/catalog.data';
-import { StorageService } from '../storage/storage.service';
+import { ApiService } from '../api/api.service';
 
-const KEY = 'mb_claw';
-interface ClawState { pity: number; plays: number; }
-
+/** Client for /api/games/claw. The server decides whether the claw grips. */
 @Injectable({ providedIn: 'root' })
 export class ClawService {
-  readonly state$: BehaviorSubject<ClawState>;
+  readonly state$ = new BehaviorSubject<ClawStateView>({ pity: 0, plays: 0 });
 
-  constructor(private readonly storage: StorageService) {
-    this.state$ = new BehaviorSubject<ClawState>(this.storage.get<ClawState>(KEY) ?? { pity: 0, plays: 0 });
-  }
+  constructor(private readonly api: ApiService) {}
 
-  get state(): ClawState { return this.state$.value; }
+  get state(): ClawStateView { return this.state$.value; }
   get powerReady(): boolean { return this.state.pity >= CLAW_PITY; }
 
-  play(): void { this.save({ ...this.state, plays: this.state.plays + 1 }); }
-  miss(): void { this.save({ ...this.state, pity: this.state.pity + 1 }); }
-  win(): void { this.save({ ...this.state, pity: 0 }); }
+  async load(): Promise<void> {
+    this.set(await this.api.game<ClawStateView>('claw', 'state'));
+  }
 
-  private save(s: ClawState): void {
-    this.storage.set(KEY, s);
-    this.state$.next(s);
+  async start(): Promise<ClawStartResult | null> {
+    const r = await this.api.game<ClawStartResult>('claw', 'start', {});
+    this.set(r?.state ?? null);
+    return r;
+  }
+
+  grab(playId: string, align: number): Promise<ClawGrabResult | null> {
+    return this.api.game<ClawGrabResult>('claw', 'grab', { playId, align });
+  }
+
+  /** prize = character key that dropped into the chute, or null. Winnings held until api.commit(). */
+  async finish(playId: string, prize: string | null): Promise<ClawFinishResult | null> {
+    const r = await this.api.game<ClawFinishResult>('claw', 'finish', { playId, prize }, { hold: true });
+    this.set(r?.state ?? null);
+    return r;
+  }
+
+  private set(s: ClawStateView | null): void {
+    if (s) { this.state$.next(s); }
   }
 }

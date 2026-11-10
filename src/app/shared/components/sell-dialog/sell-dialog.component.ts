@@ -49,11 +49,11 @@ export class SellDialogComponent {
     this.form.patchValue({ uid, price: this.suggested(this.inventory.get(uid)) });
   }
 
-  submit(): void {
+  async submit(): Promise<void> {
     if (this.form.invalid) { return; }
     const { uid, price } = this.form.getRawValue();
     const e = this.inventory.get(uid);
-    this.market.list(uid, price);
+    if (!(await this.market.list(uid, price))) { return; }
     if (e) { this.toast.show('market.listedToast', { item: this.catalog.name(e.itemId), price }); }
     this.ref.close(true);
   }

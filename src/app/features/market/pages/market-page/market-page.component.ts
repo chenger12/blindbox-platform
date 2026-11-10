@@ -46,8 +46,8 @@ export class MarketPageComponent {
     return Math.round(((l.price - v) / v) * 100);
   }
 
-  buy(l: Listing): void {
-    const got = this.market.buy(l.id);
+  async buy(l: Listing): Promise<void> {
+    const got = await this.market.buy(l.id);
     if (got) { this.toast.show('market.boughtToast', { item: this.catalog.name(got) }); }
   }
 

@@ -1,17 +1,15 @@
 import { ChangeDetectorRef, Component, QueryList, ViewChildren } from '@angular/core';
 import { BattleRoom } from '../../../../models/game/game-state.model';
 import { WeightedBox } from '../../../../models/catalog/catalog.model';
+import { BattleResult } from '../../../../models/api/api.model';
+import { ApiService } from '../../../../services/api/api.service';
 import { BattleService } from '../../../../services/battle/battle.service';
 import { CatalogService } from '../../../../services/catalog/catalog.service';
-import { DailyService } from '../../../../services/daily/daily.service';
 import { DialogService } from '../../../../services/dialog/dialog.service';
 import { FxService } from '../../../../services/fx/fx.service';
-import { InventoryService } from '../../../../services/inventory/inventory.service';
 import { ResultService } from '../../../../services/result/result.service';
-import { WalletService } from '../../../../services/wallet/wallet.service';
 import { ReelComponent } from '../../../../shared/components/reel/reel.component';
-import { BOT_NAMES } from '../../../../utils/catalog.data';
-import { pick, randInt, sleep } from '../../../../utils/random.util';
+import { randInt, sleep } from '../../../../utils/random.util';
 import { CreateBattleDialogComponent, CreateBattleResult } from '../../components/create-battle-dialog/create-battle-dialog.component';
 
 interface Player { name: string | null; me: boolean; items: string[]; total: number; state: '' | 'lead' | 'win' | 'lose'; }
@@ -36,11 +34,9 @@ export class BattlesPageComponent {
   constructor(
     readonly battles: BattleService,
     readonly catalog: CatalogService,
-    private readonly wallet: WalletService,
-    private readonly inventory: InventoryService,
+    private readonly api: ApiService,
     private readonly dialogs: DialogService,
     private readonly results: ResultService,
-    private readonly daily: DailyService,
     private readonly fx: FxService,
     private readonly cdr: ChangeDetectorRef
   ) {}
@@ -53,23 +49,23 @@ export class BattlesPageComponent {
     return Array.from({ length: Math.max(0, b.players - b.joined.length) }, (_, i) => i);
   }
 
-  join(b: BattleRoom): void {
-    if (!this.wallet.trySpend(this.battles.cost(b))) { return; }
-    const room = this.battles.take(b.id);
-    if (room) { void this.run(room, true); }
+  /** The battles API plays the whole battle (and charges); this page replays it round by round. */
+  async join(b: BattleRoom): Promise<void> {
+    const r = await this.battles.join(b.id);
+    if (r) { void this.run(r, true); }
   }
 
-  watch(b: BattleRoom): void {
-    const room = this.battles.take(b.id);
-    if (room) { void this.run(room, false); }
+  async watch(b: BattleRoom): Promise<void> {
+    const r = await this.battles.watch(b.id);
+    if (r) { void this.run(r, false); }
   }
 
   create(): void {
     this.dialogs.open<CreateBattleDialogComponent, unknown, CreateBattleResult>(CreateBattleDialogComponent, { panel: { maxWidth: 520 } })
-      .afterClosed().subscribe(r => {
+      .afterClosed().subscribe(async r => {
         if (!r) { return; }
-        const room: BattleRoom = { id: 'mine', players: r.players, rounds: r.rounds, joined: [], live: false };
-        if (this.wallet.trySpend(this.battles.cost(room))) { void this.run(room, true); }
+        const res = await this.battles.create(r.players, r.rounds);
+        if (res) { void this.run(res, true); }
       });
   }
 
@@ -78,18 +74,18 @@ export class BattlesPageComponent {
     this.finished = false;
   }
 
-  private async run(b: BattleRoom, me: boolean): Promise<void> {
+  private async run(res: BattleResult, me: boolean): Promise<void> {
+    const b = res.room;
     this.running = b;
     this.finished = false;
     this.round = -1;
     this.roundBox = null;
     this.pot = 0;
-    const names = [...(me ? ['me'] : []), ...b.joined].slice(0, b.players);
-    this.players = Array.from({ length: b.players }, (_, i) => ({ name: names[i] ?? null, me: me && i === 0, items: [], total: 0, state: '' }));
+    const seated = [...(me ? ['me'] : []), ...b.joined].slice(0, b.players).length;
+    this.players = Array.from({ length: b.players }, (_, i) => ({ name: i < seated ? res.names[i] : null, me: me && i === 0, items: [], total: 0, state: '' }));
     this.statusKey = me ? 'battles.waitingPlayers' : 'battles.spectating';
-    if (me) { this.daily.track('games'); }
-    for (const p of this.players) {
-      if (!p.name) { await sleep(randInt(600, 1300)); p.name = pick(BOT_NAMES.filter(n => !this.players.some(x => x.name === n))); this.fx.pop(); }
+    for (const [i, p] of this.players.entries()) {
+      if (!p.name) { await sleep(randInt(600, 1300)); p.name = res.names[i]; this.fx.pop(); }
     }
     for (const t of ['3', '2', '1']) { this.statusKey = ''; this.statusParams = {}; this.countText = t; this.fx.tick(); await sleep(600); }
     this.countText = '';
@@ -98,7 +94,7 @@ export class BattlesPageComponent {
       this.roundBox = this.box(b.rounds[r]);
       this.statusKey = 'battles.roundOf';
       this.statusParams = { n: r + 1, total: b.rounds.length, box: '' };
-      this.winners = this.players.map(() => this.catalog.roll(this.roundBox as WeightedBox).id);
+      this.winners = res.rolls[r];
       this.cdr.detectChanges();
       await sleep(120);
       await Promise.all(this.reels.map((reel, i) => reel.spin(3400 + i * 150, i === 0)));
@@ -115,21 +111,19 @@ export class BattlesPageComponent {
       this.fx.pop();
       await sleep(900);
     }
-    const win = this.leader();
-    const bonus = Math.round(this.pot * 0.1);
+    const win = res.winner;
+    const bonus = res.bonus;
     this.players.forEach((p, i) => p.state = i === win ? 'win' : 'lose');
     this.statusKey = this.players[win].me ? 'battles.youWin' : 'battles.wins';
     this.statusParams = { user: this.players[win].name ?? '', n: bonus };
     this.round = b.rounds.length;
     this.finished = true;
     if (me) {
-      const mine = this.players[0];
-      const uids = mine.items.map(id => this.inventory.add(id, 'battle'));
-      this.wallet.gainXp(this.battles.cost(b));
-      if (win === 0) { this.wallet.add(bonus); this.fx.confetti(220, undefined, undefined, 'battles'); this.fx.big(); this.daily.track('wins'); } else { this.fx.fail(); }
+      this.api.commit();
+      if (win === 0) { this.fx.confetti(220, undefined, undefined, 'battles'); this.fx.big(); } else { this.fx.fail(); }
       await sleep(1400);
       await this.results.show({
-        items: mine.items.map((itemId, i) => ({ itemId, uid: uids[i] })),
+        items: res.items,
         titleKey: win === 0 ? 'battles.resultWin' : 'battles.resultLose', titleParams: { n: bonus }
       });
     }

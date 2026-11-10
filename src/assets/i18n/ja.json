@@ -916,5 +916,14 @@
    "api": "データソース",
    "apiHelp": "このビルドはモックAPI（ブラウザ保存）に保存します。environment.apiUrl をサーバーに向け、useMockBackend をオフにすれば本番運用できます。管理画面は GET/PUT /api/site-config を呼び出します。"
   }
+ },
+ "api": {
+  "gameDisabled": "このゲームは現在お休み中です",
+  "error": "うまくいきませんでした。もう一度お試しください",
+  "itemUnavailable": "このアイテムは今は使えません（出品中または交換中の可能性があります）",
+  "listingGone": "この出品はすでに購入されました",
+  "battleGone": "このバトルはすでに始まっています。別のバトルを選んでください",
+  "offerGone": "このオファーは無効になりました",
+  "slotTaken": "この箱はたった今ほかの人に買われました"
  }
 }

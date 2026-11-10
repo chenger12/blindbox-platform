@@ -3,17 +3,20 @@ import { Injectable } from '@angular/core';
 import { Observable, of, throwError } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
+import { mockServer, SITE_CONFIG_KEY } from '../../mock-server/server';
 import { SiteConfig } from '../../models/theme/theme.model';
 import { StorageService } from '../storage/storage.service';
 
-export const SITE_CONFIG_KEY = 'mb_site_config';
+export { SITE_CONFIG_KEY };
 const DEFAULT_CONFIG_URL = 'assets/config/site-config.json';
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = 'admin123';
 
 /**
  * Stand-in for the real API while there is no server.
- * GET/PUT /api/site-config persist to localStorage; swap `useMockBackend` off to hit a real backend.
+ * - /api/site-config and /api/admin/login are answered here (persisted to localStorage).
+ * - /api/account/... and /api/games/<game>/... go to the in-browser mock server (src/app/mock-server).
+ * Set `useMockBackend: false` in the environment to send everything to a real backend instead.
  */
 @Injectable()
 export class MockBackendInterceptor implements HttpInterceptor {
@@ -25,6 +28,12 @@ export class MockBackendInterceptor implements HttpInterceptor {
       return next.handle(req);
     }
     const path = req.url.slice(prefix.length);
+    if (mockServer.handles(path)) {
+      const res = mockServer.handle(req.method, path, req.body);
+      return res.status === 200
+        ? this.ok(res.body)
+        : throwError(() => new HttpErrorResponse({ status: res.status, error: res.body, url: req.url }));
+    }
     if (path === 'site-config' && req.method === 'GET') {
       const stored = this.storage.get<SiteConfig>(SITE_CONFIG_KEY);
       return stored ? this.ok(stored) : this.loadDefault(req, next);
@@ -57,6 +66,7 @@ export class MockBackendInterceptor implements HttpInterceptor {
   private loadDefault(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     return next.handle(req.clone({ url: DEFAULT_CONFIG_URL, method: 'GET', body: null })).pipe(
       filter((e): e is HttpResponse<unknown> => e instanceof HttpResponse),
+      tap(e => mockServer.setDefaultConfig(e.body as SiteConfig)),
       map(e => e as HttpEvent<unknown>),
       tap({ error: () => undefined })
     );

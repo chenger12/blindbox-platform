@@ -1,19 +1,16 @@
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { BlindBoxSlot } from '../../../../models/game/game-state.model';
 import { BlindBoxService } from '../../../../services/blind-box/blind-box.service';
-import { DailyService } from '../../../../services/daily/daily.service';
+import { ApiService } from '../../../../services/api/api.service';
 import { FxService } from '../../../../services/fx/fx.service';
-import { InventoryService } from '../../../../services/inventory/inventory.service';
 import { ResultService } from '../../../../services/result/result.service';
 import { ThemeService } from '../../../../services/theme/theme.service';
 import { ToastService } from '../../../../services/toast/toast.service';
 import { WalletService } from '../../../../services/wallet/wallet.service';
 import { CatalogService } from '../../../../services/catalog/catalog.service';
 import { BLIND_BOX_PRICE, BLIND_BOX_SECRET } from '../../../../utils/catalog.data';
+import { BLIND_BOX_HINT_PRICE, BLIND_BOX_XRAY_PRICE, blindBoxCaseCost } from '../../../../utils/game-rules.util';
 import { pick, randInt, sleep } from '../../../../utils/random.util';
-
-const HINT_PRICE = 10;
-const XRAY_PRICE = 30;
 
 @Component({
   selector: 'app-blind-box-page',
@@ -22,8 +19,8 @@ const XRAY_PRICE = 30;
 })
 export class BlindBoxPageComponent implements OnInit, OnDestroy {
   readonly price = BLIND_BOX_PRICE;
-  readonly hintPrice = HINT_PRICE;
-  readonly xrayPrice = XRAY_PRICE;
+  readonly hintPrice = BLIND_BOX_HINT_PRICE;
+  readonly xrayPrice = BLIND_BOX_XRAY_PRICE;
   readonly secret = BLIND_BOX_SECRET;
   busy = false;
   shaking = -1;
@@ -34,13 +31,12 @@ export class BlindBoxPageComponent implements OnInit, OnDestroy {
   constructor(
     readonly bb: BlindBoxService,
     readonly wallet: WalletService,
-    private readonly inventory: InventoryService,
+    private readonly api: ApiService,
     private readonly catalog: CatalogService,
     private readonly theme: ThemeService,
     private readonly fx: FxService,
     private readonly toast: ToastService,
     private readonly results: ResultService,
-    private readonly daily: DailyService,
     private readonly zone: NgZone
   ) {}
 
@@ -80,30 +76,19 @@ export class BlindBoxPageComponent implements OnInit, OnDestroy {
       this.toast.show(slot.sold === 1 ? 'blindBox.takenByYou' : 'blindBox.takenBy', { n: i + 1, user: slot.by ?? '', item: this.catalog.name(slot.itemId) });
       return;
     }
-    this.bb.select(i);
+    void this.bb.select(i);
     this.fx.pop();
     this.fx.vibrate(15);
   }
 
-  hint(): void {
-    const i = this.bb.state.selected;
-    if (!this.wallet.state.hintCards) {
-      if (!this.wallet.trySpend(HINT_PRICE)) { return; }
-      this.wallet.useCard('hintCards', 1);
-    }
-    if (this.bb.hint(i) === null) { this.toast.show('blindBox.onlyOne'); return; }
-    this.wallet.useCard('hintCards');
-    this.fx.tear();
+  /** Uses a hint card, or pays the hint price — the API decides which style to rule out. */
+  async hint(): Promise<void> {
+    if (await this.bb.hint(this.bb.state.selected)) { this.fx.tear(); }
   }
 
-  xray(): void {
-    const i = this.bb.state.selected;
-    if (!this.wallet.state.xrayCards) {
-      if (!this.wallet.trySpend(XRAY_PRICE)) { return; }
-      this.wallet.useCard('xrayCards', 1);
-    }
-    this.wallet.useCard('xrayCards');
-    const id = this.bb.xray(i);
+  async xray(): Promise<void> {
+    const id = await this.bb.xray(this.bb.state.selected);
+    if (!id) { return; }
     if (id === BLIND_BOX_SECRET) { this.fx.big(); this.fx.confetti(120, undefined, undefined, 'blindBox'); } else { this.fx.win(); }
   }
 
@@ -112,47 +97,43 @@ export class BlindBoxPageComponent implements OnInit, OnDestroy {
     this.shaking = i;
     this.fx.whir();
     this.fx.vibrate([30, 40, 30, 40, 30]);
-    await sleep(800);
+    await Promise.all([this.bb.shake(i), sleep(800)]);
     this.shaking = -1;
-    this.bb.shake(i);
   }
 
   another(): void {
     const s = this.bb.state;
     const open = s.slots.map((_, i) => i).filter(i => !s.slots[i].sold && i !== s.selected);
     if (!open.length) { this.toast.show('blindBox.noOther'); return; }
-    this.bb.select(pick(open));
+    void this.bb.select(pick(open));
     this.fx.pop();
   }
 
-  newCase(): void {
-    this.bb.newCase();
+  async newCase(): Promise<void> {
+    await this.bb.newCase();
     this.fx.whir();
     this.toast.show('blindBox.newCaseToast', { n: this.bb.state.caseNo });
   }
 
   caseCost(): number {
-    return Math.floor(this.bb.remaining() * BLIND_BOX_PRICE * 0.9);
+    return blindBoxCaseCost(this.bb.remaining());
   }
 
   async buy(all: boolean): Promise<void> {
     if (this.busy) { return; }
     const s = this.bb.state;
-    const idx = all ? s.slots.map((_, i) => i).filter(i => !s.slots[i].sold) : [s.selected];
-    if (!idx.length || idx[0] < 0) { return; }
-    const cost = idx.length > 1 ? Math.floor(idx.length * BLIND_BOX_PRICE * 0.9) : BLIND_BOX_PRICE;
-    if (!this.wallet.trySpend(cost)) { return; }
+    const single = !all && s.selected >= 0;
+    if (!all && !single) { return; }
     this.busy = true;
-    if (idx.length === 1) { await this.playUnbox(this.color(idx[0])); }
-    const got = this.bb.buy(idx);
-    const uids = got.map(id => this.inventory.add(id, 'blindBox', id === BLIND_BOX_SECRET ? 'SECRET' : undefined));
-    this.wallet.gainXp(cost);
-    this.daily.track('games');
-    if (got.includes(BLIND_BOX_SECRET)) { this.daily.track('wins'); }
+    const color = single ? this.color(s.selected) : '';
+    const res = await this.bb.buy(single ? { index: s.selected } : { all: true });
+    if (!res) { this.busy = false; return; }
+    if (single) { await this.playUnbox(color); }
+    this.api.commit();
     const left = this.bb.remaining();
-    const r = await this.results.show({ items: got.map((itemId, i) => ({ itemId, uid: uids[i], tier: itemId === BLIND_BOX_SECRET ? 'SECRET' : undefined })), againLabelKey: left ? 'blindBox.pickAnother' : undefined });
+    const r = await this.results.show({ items: res.items, againLabelKey: left ? 'blindBox.pickAnother' : undefined });
     this.busy = false;
-    if (!left) { this.bb.newCase(); this.toast.show('blindBox.soldOutNew'); }
+    if (!left) { await this.bb.newCase(); this.toast.show('blindBox.soldOutNew'); }
     if (r === 'again') { this.another(); }
   }
 
@@ -178,7 +159,7 @@ export class BlindBoxPageComponent implements OnInit, OnDestroy {
   private scheduleBot(): void {
     this.botTimer = setTimeout(() => {
       this.zone.run(() => {
-        if (!this.busy && Math.random() < 0.5) { this.bb.botBuy(); }
+        if (!this.busy) { void this.bb.tick(); }
       });
       this.scheduleBot();
     }, randInt(6000, 12000));

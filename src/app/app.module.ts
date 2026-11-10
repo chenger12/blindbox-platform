@@ -6,15 +6,16 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { LayoutModule } from './layout/layout.module';
 import { MockBackendInterceptor } from './services/data/mock-backend.interceptor';
+import { AccountService } from './services/account/account.service';
 import { I18nService } from './services/i18n/i18n.service';
 import { NativeService } from './services/native/native.service';
 import { ThemeService } from './services/theme/theme.service';
 import { SharedModule } from './shared/shared.module';
 import { ServiceWorkerModule } from '@angular/service-worker';
 
-/** Loads the site config (theme, layout, games) and the dictionary before the first render. */
-export function bootFactory(theme: ThemeService, i18n: I18nService, native: NativeService): () => Promise<void> {
-  return () => theme.load().then(() => {
+/** Loads the site config (theme, layout, games), the player's account and the dictionary before the first render. */
+export function bootFactory(theme: ThemeService, i18n: I18nService, native: NativeService, account: AccountService): () => Promise<void> {
+  return () => theme.load().then(() => account.load()).then(() => {
     const bg = theme.config.colors.background.replace('#', '');
     const lum = parseInt(bg.slice(0, 2), 16) * 0.3 + parseInt(bg.slice(2, 4), 16) * 0.59 + parseInt(bg.slice(4, 6), 16) * 0.11;
     native.init(lum < 128);
@@ -34,7 +35,7 @@ export function bootFactory(theme: ThemeService, i18n: I18nService, native: Nati
     provideHttpClient(withInterceptorsFromDi()),
     provideAnimationsAsync(),
     { provide: HTTP_INTERCEPTORS, useClass: MockBackendInterceptor, multi: true },
-    { provide: APP_INITIALIZER, useFactory: bootFactory, deps: [ThemeService, I18nService, NativeService], multi: true }
+    { provide: APP_INITIALIZER, useFactory: bootFactory, deps: [ThemeService, I18nService, NativeService, AccountService], multi: true }
   ],
   bootstrap: [AppComponent]
 })

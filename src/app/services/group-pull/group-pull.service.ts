@@ -1,31 +1,26 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { GroupLobby, GroupPullResult } from '../../models/api/api.model';
 import { GroupRoom } from '../../models/game/game-state.model';
-import { BOT_NAMES } from '../../utils/catalog.data';
-import { randInt, shuffle } from '../../utils/random.util';
-import { StorageService } from '../storage/storage.service';
+import { ApiService } from '../api/api.service';
 
-const KEY = 'mb_group_pull';
-
+/** Client for /api/games/group-pull. The server rolls every seat and picks the winner. */
 @Injectable({ providedIn: 'root' })
 export class GroupPullService {
-  readonly loseStreak$: BehaviorSubject<number>;
+  readonly loseStreak$ = new BehaviorSubject<number>(0);
+  readonly rooms$ = new BehaviorSubject<GroupRoom[]>([]);
 
-  constructor(private readonly storage: StorageService) {
-    this.loseStreak$ = new BehaviorSubject<number>(this.storage.get<number>(KEY, 0) ?? 0);
+  constructor(private readonly api: ApiService) {}
+
+  async load(): Promise<void> {
+    const l = await this.api.game<GroupLobby>('group-pull', 'lobby');
+    if (l) { this.rooms$.next(l.rooms); this.loseStreak$.next(l.loseStreak); }
   }
 
-  rooms(): GroupRoom[] {
-    return [2, 3, 4].map(size => ({ size, bots: shuffle(BOT_NAMES).slice(0, randInt(0, size - 1)) }));
-  }
-
-  /** Records a result. Returns true when the consolation ticket was earned. */
-  record(won: boolean): boolean {
-    let n = won ? 0 : this.loseStreak$.value + 1;
-    let bonus = false;
-    if (n >= 3) { n = 0; bonus = true; }
-    this.storage.set(KEY, n);
-    this.loseStreak$.next(n);
-    return bonus;
+  /** Winnings held until api.commit(). */
+  async join(room: GroupRoom): Promise<GroupPullResult | null> {
+    const r = await this.api.game<GroupPullResult>('group-pull', 'join', { size: room.size, bots: room.bots }, { hold: true });
+    if (r) { this.loseStreak$.next(r.loseStreak); }
+    return r;
   }
 }

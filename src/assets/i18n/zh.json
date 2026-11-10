@@ -916,5 +916,14 @@
    "api": "数据来源",
    "apiHelp": "当前版本保存到模拟 API（浏览器存储）。把 environment.apiUrl 指向你的服务器并关闭 useMockBackend 即可上线——后台调用的是 GET/PUT /api/site-config。"
   }
+ },
+ "api": {
+  "gameDisabled": "这个玩法暂时关闭了",
+  "error": "操作没有成功，请再试一次",
+  "itemUnavailable": "这件物品现在不能用（可能正在挂售或置换中）",
+  "listingGone": "这件商品已经被买走了",
+  "battleGone": "这场对战已经开始了，换一场吧",
+  "offerGone": "这个报价已经失效了",
+  "slotTaken": "这一盒刚被别人买走了"
  }
 }

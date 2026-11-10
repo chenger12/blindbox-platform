@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { MissionId } from '../../../models/user/user.model';
+import { AccountService } from '../../../services/account/account.service';
 import { DailyService, MISSIONS } from '../../../services/daily/daily.service';
 import { ToastService } from '../../../services/toast/toast.service';
 
@@ -11,10 +12,10 @@ import { ToastService } from '../../../services/toast/toast.service';
 export class MissionsSectionComponent {
   readonly missions = MISSIONS;
 
-  constructor(readonly daily: DailyService, private readonly toast: ToastService) {}
+  constructor(readonly daily: DailyService, private readonly account: AccountService, private readonly toast: ToastService) {}
 
-  claim(id: MissionId): void {
-    const got = this.daily.claimMission(id);
-    if (got) { this.toast.show('home.missionToast', { n: got }); }
+  async claim(id: MissionId): Promise<void> {
+    const r = await this.account.claimMission(id);
+    if (r) { this.toast.show('home.missionToast', { n: r.coins }); }
   }
 }

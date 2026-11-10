@@ -5,6 +5,7 @@ import { Observable, combineLatest } from 'rxjs';
 import { filter, map, startWith } from 'rxjs/operators';
 import { NavLink } from '../../../models/layout/nav.model';
 import { GameId, LangCode, SiteConfig } from '../../../models/theme/theme.model';
+import { AccountService } from '../../../services/account/account.service';
 import { FeedService } from '../../../services/feed/feed.service';
 import { FxService } from '../../../services/fx/fx.service';
 import { I18nService } from '../../../services/i18n/i18n.service';
@@ -36,6 +37,7 @@ export class AppShellComponent implements OnInit {
     private readonly market: MarketService,
     private readonly swap: SwapService,
     private readonly toast: ToastService,
+    private readonly account: AccountService,
     private readonly sanitizer: DomSanitizer,
     router: Router
   ) {
@@ -54,9 +56,8 @@ export class AppShellComponent implements OnInit {
     this.swap.start();
   }
 
-  topUp(): void {
-    this.wallet.add(500);
-    this.toast.show('toast.topUp');
+  async topUp(): Promise<void> {
+    if (await this.account.topUp()) { this.toast.show('toast.topUp'); }
   }
 
   setLang(code: string): void {

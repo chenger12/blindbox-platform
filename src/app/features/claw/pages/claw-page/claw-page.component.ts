@@ -1,18 +1,16 @@
 import { AfterViewInit, Component, ElementRef, HostListener, NgZone, OnDestroy, ViewChild } from '@angular/core';
+import { ApiService } from '../../../../services/api/api.service';
 import { ArtService } from '../../../../services/art/art.service';
 import { ClawService } from '../../../../services/claw/claw.service';
-import { DailyService } from '../../../../services/daily/daily.service';
 import { FxService } from '../../../../services/fx/fx.service';
-import { InventoryService } from '../../../../services/inventory/inventory.service';
 import { ResultService } from '../../../../services/result/result.service';
 import { ThemeService } from '../../../../services/theme/theme.service';
 import { ToastService } from '../../../../services/toast/toast.service';
-import { WalletService } from '../../../../services/wallet/wallet.service';
 import { CLAW_CHARS, CLAW_PITY, CLAW_PRICE } from '../../../../utils/catalog.data';
 import { pick, rand } from '../../../../utils/random.util';
 
 interface Prize { x: number; y: number; vx: number; vy: number; r: number; k: string; a: number; held?: boolean; }
-type ClawState = 'off' | 'ready' | 'down' | 'close' | 'up' | 'toChute' | 'release' | 'end';
+type ClawState = 'off' | 'starting' | 'ready' | 'down' | 'close' | 'deciding' | 'up' | 'toChute' | 'release' | 'end';
 const CW = 340;
 const CH = 400;
 const FLOOR = CH - 14;
@@ -48,17 +46,18 @@ export class ClawPageComponent implements AfterViewInit, OnDestroy {
   private raf = 0;
   private alive = true;
   private lastSec = 15;
+  /** Current play on the server, and whether it has been settled. */
+  private playId: string | null = null;
+  private settled = false;
 
   constructor(
     readonly claw: ClawService,
-    private readonly wallet: WalletService,
-    private readonly inventory: InventoryService,
+    private readonly api: ApiService,
     private readonly art: ArtService,
     private readonly theme: ThemeService,
     private readonly fx: FxService,
     private readonly results: ResultService,
     private readonly toast: ToastService,
-    private readonly daily: DailyService,
     private readonly zone: NgZone
   ) {}
 
@@ -101,25 +100,28 @@ export class ClawPageComponent implements AfterViewInit, OnDestroy {
     if (d) { this.fx.tick(); }
   }
 
-  start(): void {
+  /** Pays through the claw API; the server remembers whether this play has the power grip. */
+  async start(): Promise<void> {
     if (this.st !== 'off') { return; }
-    if (!this.wallet.trySpend(CLAW_PRICE)) { return; }
-    this.strong = this.claw.powerReady;
+    this.st = 'starting';
+    const r = await this.claw.start();
+    if (!r) { this.st = 'off'; return; }
+    this.playId = r.playId;
+    this.settled = false;
+    this.strong = r.strong;
     this.won = false;
     this.st = 'ready';
     this.time = 15;
     this.timeLeft = 15;
     this.y = TOPY;
     this.f = 0;
-    this.claw.play();
-    this.daily.track('games');
     this.message = null;
     this.fx.coin();
     if (this.strong) { this.toast.show('claw.powerActive'); }
   }
 
   grab(): void {
-    if (this.st === 'off') { this.start(); return; }
+    if (this.st === 'off') { void this.start(); return; }
     if (this.st !== 'ready') { return; }
     this.st = 'down';
     this.holdDir = 0;
@@ -167,9 +169,9 @@ export class ClawPageComponent implements AfterViewInit, OnDestroy {
     for (const p of [...P]) {
       if (!p.held && p.x < CHX && p.y > CHTOP + 20) {
         P.splice(P.indexOf(p), 1);
-        if (this.settle || this.st === 'off') { this.spawn(); continue; }
+        if (this.settle || this.st === 'off' || this.won) { this.spawn(); continue; }
         this.won = true;
-        this.zone.run(() => this.win(p));
+        this.zone.run(() => void this.win(p));
       }
     }
   }
@@ -192,16 +194,21 @@ export class ClawPageComponent implements AfterViewInit, OnDestroy {
         let best: Prize | null = null;
         let bd = 1e9;
         for (const p of this.prizes) { const d = Math.hypot(p.x - this.x, (p.y - tipY) * 0.6); if (d < p.r + 12 && d < bd) { bd = d; best = p; } }
-        if (best) {
-          const al = 1 - Math.min(1, Math.abs(best.x - this.x) / best.r);
-          const chance = this.strong ? 1 : 0.22 + 0.55 * al;
-          if (Math.random() < chance) {
-            this.held = best; best.held = true;
-            this.slipY = !this.strong && Math.random() < 0.4 ? rand(TOPY + 20, best.y - 40) : null;
-            this.fx.pop();
-          }
+        if (best && this.playId) {
+          const target = best;
+          const al = 1 - Math.min(1, Math.abs(target.x - this.x) / target.r);
+          this.st = 'deciding';
+          void this.claw.grab(this.playId, al).then(g => {
+            if (g?.grip) {
+              this.held = target; target.held = true;
+              this.slipY = g.slip ? rand(TOPY + 20, target.y - 40) : null;
+              this.fx.pop();
+            }
+            this.st = 'up';
+          });
+        } else {
+          this.st = 'up';
         }
-        this.st = 'up';
       }
     } else if (this.st === 'up') {
       this.y -= 2.4;
@@ -236,21 +243,29 @@ export class ClawPageComponent implements AfterViewInit, OnDestroy {
     setTimeout(() => { if (this.st !== 'off') { this.message = null; } }, 900);
   }
 
+  /** A prize reached the chute — the claw API decides whether it counts (only after a server-approved grip). */
   private async win(p: Prize): Promise<void> {
-    const itemId = 'cm_' + p.k;
-    const uid = this.inventory.add(itemId, 'claw', 'CLAW');
-    this.claw.win();
-    this.daily.track('wins');
     setTimeout(() => this.spawn(), 1500);
-    await new Promise(r => setTimeout(r, 400));
-    const r = await this.results.show({ items: [{ itemId, uid, tier: 'CLAW' }], againLabelKey: 'claw.playAgain' });
-    if (r === 'again') { this.start(); }
+    const r = await this.finishPlay(p.k);
+    if (!r?.won || !r.item) { this.won = false; return; }
+    await new Promise(res => setTimeout(res, 400));
+    this.api.commit();
+    const action = await this.results.show({ items: [r.item], againLabelKey: 'claw.playAgain' });
+    if (action === 'again') { void this.start(); }
+  }
+
+  /** Ends the play on the server exactly once. */
+  private finishPlay(prize: string | null) {
+    if (!this.playId || this.settled) { return Promise.resolve(null); }
+    this.settled = true;
+    return this.claw.finish(this.playId, prize);
   }
 
   private roundOver(): void {
-    setTimeout(() => {
+    setTimeout(async () => {
       if (this.won) { this.message = { key: 'claw.insert', retry: false }; return; }
-      this.claw.miss();
+      await this.finishPlay(null);
+      this.api.commit();
       this.fx.fail();
       const left = CLAW_PITY - this.claw.state.pity;
       this.message = { key: left <= 0 ? 'claw.closePower' : 'claw.close', params: { n: left }, retry: true };

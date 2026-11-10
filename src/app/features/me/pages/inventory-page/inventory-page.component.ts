@@ -7,7 +7,7 @@ import { CatalogService } from '../../../../services/catalog/catalog.service';
 import { DialogService } from '../../../../services/dialog/dialog.service';
 import { InventoryService } from '../../../../services/inventory/inventory.service';
 import { ToastService } from '../../../../services/toast/toast.service';
-import { WalletService } from '../../../../services/wallet/wallet.service';
+import { AccountService } from '../../../../services/account/account.service';
 import { SellDialogComponent, SellDialogData } from '../../../../shared/components/sell-dialog/sell-dialog.component';
 import { BLIND_BOX_POOL, BLIND_BOX_SECRET, CLAW_CHARS, GACHA_POOL, KUJI_LAST_ONE, KUJI_PRIZES } from '../../../../utils/catalog.data';
 
@@ -37,7 +37,7 @@ export class InventoryPageComponent {
     fb: FormBuilder,
     readonly inventory: InventoryService,
     private readonly catalog: CatalogService,
-    private readonly wallet: WalletService,
+    private readonly account: AccountService,
     private readonly dialogs: DialogService,
     private readonly toast: ToastService
   ) {
@@ -71,13 +71,12 @@ export class InventoryPageComponent {
     this.form.updateValueAndValidity();
   }
 
-  sell(): void {
-    const v = Math.round(this.selectedValue() * 0.8);
-    const n = this.selected.size;
-    this.inventory.remove([...this.selected]);
+  async sell(): Promise<void> {
+    const r = await this.account.sell([...this.selected]);
+    if (!r) { return; }
     this.selected.clear();
-    this.wallet.add(v);
-    this.toast.show('result.soldToast', { n, coins: v });
+    this.form.updateValueAndValidity();
+    this.toast.show('result.soldToast', { n: r.n, coins: r.coins });
   }
 
   list(): void {

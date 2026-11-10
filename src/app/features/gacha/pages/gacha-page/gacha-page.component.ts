@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ElementRef, NgZone, OnDestroy, ViewChild } from '@angular/core';
 import { GachaEntry } from '../../../../models/catalog/catalog.model';
-import { DailyService } from '../../../../services/daily/daily.service';
+import { ApiService } from '../../../../services/api/api.service';
 import { DialogService } from '../../../../services/dialog/dialog.service';
 import { FeedService } from '../../../../services/feed/feed.service';
 import { FxService } from '../../../../services/fx/fx.service';
@@ -40,6 +40,7 @@ export class GachaPageComponent implements AfterViewInit, OnDestroy {
   private alive = true;
   private trial = false;
   private count = 1;
+  private uids: number[] = [];
 
   constructor(
     readonly gacha: GachaService,
@@ -50,7 +51,7 @@ export class GachaPageComponent implements AfterViewInit, OnDestroy {
     private readonly results: ResultService,
     private readonly dialogs: DialogService,
     private readonly toast: ToastService,
-    private readonly daily: DailyService,
+    private readonly api: ApiService,
     private readonly feed: FeedService,
     private readonly i18n: I18nService,
     private readonly zone: NgZone
@@ -86,19 +87,19 @@ export class GachaPageComponent implements AfterViewInit, OnDestroy {
     this.dialogs.open(OddsDialogComponent, { title: this.i18n.t('gacha.oddsTitle'), data });
   }
 
+  /** The gacha API rolls every capsule (and charges); the machine then drops them one by one. */
   async spin(n: 1 | 5, trial: boolean): Promise<void> {
     if (this.busy) { return; }
-    if (!trial) {
-      if (n === 1 && this.wallet.state.gachaTickets > 0) { this.wallet.useCard('gachaTickets'); this.toast.show('gacha.usedTicket'); }
-      else if (!this.wallet.trySpend(n === 5 ? GACHA_PRICE_5 : GACHA_PRICE)) { return; }
-    }
     this.busy = true;
+    const r = await this.gacha.spin(n, trial);
+    if (!r) { this.busy = false; return; }
+    if (r.ticketUsed) { this.toast.show('gacha.usedTicket'); }
     this.trial = trial;
     this.count = n;
+    this.uids = r.uids;
     this.tray = [];
-    for (let i = 0; i < n; i++) {
+    for (const entry of r.entries) {
       await this.turnKnob();
-      const entry = this.gacha.roll(trial);
       let low = 0;
       this.caps.forEach((c, j) => { if (c.y > this.caps[low].y) { low = j; } });
       const cap = this.caps.splice(low, 1)[0];
@@ -135,13 +136,10 @@ export class GachaPageComponent implements AfterViewInit, OnDestroy {
   private async finish(): Promise<void> {
     await sleep(700);
     const got = this.tray.map(t => t.entry);
-    let uids: number[] = [];
+    const uids = this.uids;
     if (!this.trial) {
-      uids = got.map(e => this.inventory.add(e.itemId, 'gacha', e.tier));
+      this.api.commit();
       got.forEach(e => this.feed.mine(e.itemId, 'gacha'));
-      this.wallet.gainXp(this.count === 5 ? GACHA_PRICE_5 : GACHA_PRICE);
-      this.daily.track('games');
-      if (got.some(e => GachaService.isRare(e.tier))) { this.daily.track('wins'); }
     }
     const r = await this.results.show({ items: got.map((e, i) => ({ itemId: e.itemId, tier: e.tier, uid: uids[i] })), trial: this.trial, againLabelKey: this.trial ? undefined : 'gacha.spinAgain' });
     this.busy = false;

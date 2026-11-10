@@ -3,11 +3,11 @@ import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { WeightedBox } from '../../../../models/catalog/catalog.model';
 import { CatalogService } from '../../../../services/catalog/catalog.service';
+import { BoxOpenResult } from '../../../../models/api/api.model';
+import { ApiService } from '../../../../services/api/api.service';
 import { DailyService } from '../../../../services/daily/daily.service';
 import { FeedService } from '../../../../services/feed/feed.service';
-import { InventoryService } from '../../../../services/inventory/inventory.service';
 import { ResultService } from '../../../../services/result/result.service';
-import { WalletService } from '../../../../services/wallet/wallet.service';
 import { ReelComponent } from '../../../../shared/components/reel/reel.component';
 import { percent, sleep } from '../../../../utils/random.util';
 
@@ -33,8 +33,7 @@ export class BoxDetailPageComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     readonly catalog: CatalogService,
-    private readonly wallet: WalletService,
-    private readonly inventory: InventoryService,
+    private readonly api: ApiService,
     private readonly daily: DailyService,
     private readonly feed: FeedService,
     private readonly results: ResultService,
@@ -48,7 +47,7 @@ export class BoxDetailPageComponent implements OnInit {
       const box = this.catalog.box(p.get('id') ?? '');
       if (!box) { void this.router.navigate(['/boxes']); return; }
       this.box = box;
-      this.free = this.daily.consumeFreeOpen(box.id);
+      this.free = box.id === 'starter' && this.daily.freeBoxReady;
       this.ev = this.catalog.expectedValue(box);
       this.odds = [...box.weights].sort((a, b) => this.catalog.item(b.itemId).value - this.catalog.item(a.itemId).value)
         .map(w => ({ itemId: w.itemId, odds: percent(w.weight / box.totalWeight) }));
@@ -65,31 +64,29 @@ export class BoxDetailPageComponent implements OnInit {
     if (!this.busy) { this.form.controls.count.setValue(n); }
   }
 
+  /** The box API rolls the prizes (and charges); the reels only play the result. */
   async open(demo: boolean): Promise<void> {
     if (this.busy) { return; }
     const n = demo || this.free ? 1 : this.form.controls.count.value;
-    const cost = demo || this.free ? 0 : this.box.price * n;
-    if (cost && !this.wallet.trySpend(cost)) { return; }
     this.busy = true;
-    const wins = Array.from({ length: n }, () => this.catalog.roll(this.box).id);
+    const r = demo
+      ? await this.api.game<BoxOpenResult>('boxes', 'demo', { boxId: this.box.id })
+      : await this.api.game<BoxOpenResult>('boxes', 'open', { boxId: this.box.id, count: n, free: this.free }, { hold: true });
+    if (!r) { this.busy = false; return; }
+    const wins = r.items.map(x => x.itemId);
     this.idle = false;
     this.winners = wins;
     this.cdr.detectChanges();
     await sleep(80);
     const quick = this.form.controls.quick.value;
-    await Promise.all(this.reels.map((r, i) => r.spin(quick ? 1000 : 4600 + i * 420, i === 0)));
-    let uids: number[] = [];
+    await Promise.all(this.reels.map((reel, i) => reel.spin(quick ? 1000 : 4600 + i * 420, i === 0)));
     if (!demo) {
-      uids = wins.map(id => this.inventory.add(id, 'box'));
-      this.wallet.gainXp(cost);
-      this.daily.track('opened', n);
+      this.api.commit();
       wins.forEach(id => this.feed.mine(id, 'box:' + this.box.id));
       this.free = false;
     }
     this.busy = false;
-    const action = await this.results.show({
-      items: wins.map((itemId, i) => ({ itemId, uid: uids[i] })), trial: demo, againLabelKey: 'boxes.openAgain'
-    });
+    const action = await this.results.show({ items: r.items, trial: demo, againLabelKey: 'boxes.openAgain' });
     if (action === 'again' || action === 'real') { void this.open(false); }
   }
 }

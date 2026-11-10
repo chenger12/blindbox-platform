@@ -916,5 +916,14 @@
    "api": "Data source",
    "apiHelp": "This build saves to a mock API (browser storage). Point environment.apiUrl at your server and turn off useMockBackend to go live — the BO calls GET/PUT /api/site-config."
   }
+ },
+ "api": {
+  "gameDisabled": "This game is switched off right now",
+  "error": "That didn't work — please try again",
+  "itemUnavailable": "That item can't be used right now (it may be listed or in a swap)",
+  "listingGone": "Someone already bought that listing",
+  "battleGone": "That battle has already started — pick another",
+  "offerGone": "That offer is no longer available",
+  "slotTaken": "Someone just bought that box"
  }
 }

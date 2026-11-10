@@ -1,14 +1,12 @@
 import { Component, NgZone, OnDestroy, OnInit } from '@angular/core';
 import { KujiTier } from '../../../../models/catalog/catalog.model';
-import { DailyService } from '../../../../services/daily/daily.service';
+import { ApiService } from '../../../../services/api/api.service';
 import { DialogService } from '../../../../services/dialog/dialog.service';
 import { FeedService } from '../../../../services/feed/feed.service';
 import { I18nService } from '../../../../services/i18n/i18n.service';
-import { InventoryService } from '../../../../services/inventory/inventory.service';
 import { KUJI_TIERS, KujiPull, KujiService } from '../../../../services/kuji/kuji.service';
 import { ResultService } from '../../../../services/result/result.service';
 import { ToastService } from '../../../../services/toast/toast.service';
-import { WalletService } from '../../../../services/wallet/wallet.service';
 import { OddsDialogComponent, OddsDialogData } from '../../../../shared/components/odds-dialog/odds-dialog.component';
 import { KUJI_LAST_ONE, KUJI_PRICE, KUJI_PRIZES, KUJI_TICKETS } from '../../../../utils/catalog.data';
 import { randInt } from '../../../../utils/random.util';
@@ -40,9 +38,7 @@ export class KujiPageComponent implements OnInit, OnDestroy {
 
   constructor(
     readonly kuji: KujiService,
-    private readonly wallet: WalletService,
-    private readonly inventory: InventoryService,
-    private readonly daily: DailyService,
+    private readonly api: ApiService,
     private readonly feed: FeedService,
     private readonly results: ResultService,
     private readonly dialogs: DialogService,
@@ -86,9 +82,8 @@ export class KujiPageComponent implements OnInit, OnDestroy {
   }
 
   pickBox(): void {
-    this.dialogs.open<KujiBoxPickerComponent, unknown, number>(KujiBoxPickerComponent).afterClosed().subscribe(i => {
-      if (i === undefined) { return; }
-      this.kuji.select(i);
+    this.dialogs.open<KujiBoxPickerComponent, unknown, number>(KujiBoxPickerComponent).afterClosed().subscribe(async i => {
+      if (i === undefined || !(await this.kuji.select(i))) { return; }
       this.queue = this.kuji.remaining() < 15 ? randInt(1, 4) : 0;
       this.toast.show('kuji.switched', { n: i + 1 });
     });
@@ -107,25 +102,21 @@ export class KujiPageComponent implements OnInit, OnDestroy {
     this.dialogs.open(OddsDialogComponent, { title: this.i18n.t('kuji.oddsTitle', { n: this.kuji.box.no }), data });
   }
 
+  /** The kuji API draws the tickets (and charges); the show only reveals them. */
   async draw(d: DrawCount): Promise<void> {
     if (this.busy) { return; }
     const rem = this.kuji.remaining();
     if (!rem) { this.toast.show('kuji.soldOutToast'); return; }
     const trial = d === 0;
-    const cost = this.cost(d);
-    if (!trial && !this.wallet.trySpend(cost)) { return; }
     this.busy = true;
-    const { pulls } = this.kuji.pull(trial ? 1 : d, trial);
-    const uids: number[] = [];
-    if (!trial) {
-      pulls.forEach(p => { uids.push(this.inventory.add(p.itemId, 'kuji', p.tier)); this.feed.mine(p.itemId, 'kuji'); });
-      this.wallet.gainXp(cost);
-      this.daily.track('games');
-      if (pulls.some(p => p.tier === 'A' || p.tier === 'B' || p.tier === 'LAST')) { this.daily.track('wins'); }
-    }
+    const res = await this.kuji.pull(trial ? 1 : d, trial);
+    if (!res) { this.busy = false; return; }
+    const { pulls, uids } = res;
+    if (!trial) { pulls.forEach(p => this.feed.mine(p.itemId, 'kuji')); }
     const again = trial || !this.kuji.remaining() ? null : 'kuji.pullAgain';
     let r: ShowResult | 'keep' | 'sell' | 'real' | 'close' = await new Promise<ShowResult>(resolve => this.show = { pulls, trial, again, resolve });
     this.show = null;
+    this.api.commit();
     if (r === 'skip' || r === 'more') {
       r = await this.results.show({ items: pulls.map((p, i) => ({ itemId: p.itemId, tier: p.tier, uid: uids[i] })), trial, againLabelKey: again ?? undefined });
     }
@@ -151,11 +142,12 @@ export class KujiPageComponent implements OnInit, OnDestroy {
     this.botTimer = setTimeout(() => {
       this.zone.run(() => {
         if (!this.busy) {
-          const r = this.kuji.botPull();
-          if (r?.current) {
-            this.flashId = r.pull.itemId;
-            setTimeout(() => this.flashId = null, 1200);
-          }
+          void this.kuji.botPull().then(r => {
+            if (r?.current && r.pull) {
+              this.flashId = r.pull.itemId;
+              setTimeout(() => this.flashId = null, 1200);
+            }
+          });
         }
       });
       this.scheduleBot();

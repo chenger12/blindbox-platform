@@ -26,6 +26,8 @@ export type MissionId = 'open3' | 'play2' | 'win1';
 export interface DailyState {
   day: string;
   freeBoxClaimed: boolean;
+  /** The claimed free starter box has been opened. */
+  freeBoxOpened?: boolean;
   wheelSpun: boolean;
   checkInStreak: number;
   lastCheckIn: string;

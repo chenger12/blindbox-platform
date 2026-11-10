@@ -1,16 +1,13 @@
 import { AfterViewInit, Component, ElementRef, NgZone, OnDestroy, Renderer2, ViewChild } from '@angular/core';
 import { Subscription } from 'rxjs';
-import { DailyService } from '../../../../services/daily/daily.service';
+import { ApiService } from '../../../../services/api/api.service';
 import { FxService } from '../../../../services/fx/fx.service';
 import { I18nService } from '../../../../services/i18n/i18n.service';
-import { InventoryService } from '../../../../services/inventory/inventory.service';
 import { ResultService } from '../../../../services/result/result.service';
 import { ThemeService } from '../../../../services/theme/theme.service';
 import { ToastService } from '../../../../services/toast/toast.service';
-import { WalletService } from '../../../../services/wallet/wallet.service';
 import { WHEEL_SEGMENTS, WHEEL_SPIN_PRICE, WheelService } from '../../../../services/wheel/wheel.service';
-import { KUJI_PRIZES } from '../../../../utils/catalog.data';
-import { pick, rand } from '../../../../utils/random.util';
+import { rand } from '../../../../utils/random.util';
 
 const R = 140;
 
@@ -30,9 +27,7 @@ export class WheelPageComponent implements AfterViewInit, OnDestroy {
 
   constructor(
     readonly wheel: WheelService,
-    readonly daily: DailyService,
-    private readonly wallet: WalletService,
-    private readonly inventory: InventoryService,
+    private readonly api: ApiService,
     private readonly theme: ThemeService,
     private readonly fx: FxService,
     private readonly results: ResultService,
@@ -44,7 +39,7 @@ export class WheelPageComponent implements AfterViewInit, OnDestroy {
   ) {}
 
   get freeToday(): boolean {
-    return !this.daily.state.wheelSpun;
+    return this.wheel.freeToday$.value;
   }
 
   ngAfterViewInit(): void {
@@ -60,11 +55,13 @@ export class WheelPageComponent implements AfterViewInit, OnDestroy {
     return this.i18n.t(key);
   }
 
-  async spin(free = false): Promise<void> {
+  /** The wheel API picks the segment and pays the reward; the canvas only spins to it. */
+  async spin(respin = false): Promise<void> {
     if (this.spinning) { return; }
-    if (!free && !this.daily.useFreeSpin() && !this.wallet.trySpend(WHEEL_SPIN_PRICE)) { return; }
     this.spinning = true;
-    const idx = this.wheel.pickIndex();
+    const res = await this.wheel.spin(respin);
+    if (!res) { this.spinning = false; return; }
+    const idx = res.index;
     const seg = 360 / this.segments.length;
     const target = -(idx * seg) + rand(-seg * 0.35, seg * 0.35);
     const start = this.rot;
@@ -84,20 +81,16 @@ export class WheelPageComponent implements AfterViewInit, OnDestroy {
       requestAnimationFrame(f);
     }));
     this.spinning = false;
-    this.wheel.record(idx);
+    this.api.commit();
+    this.wheel.show(res);
     const r = this.segments[idx].reward;
     if (r.coins) {
-      this.wallet.add(r.coins);
       this.fx.confetti(r.big ? 220 : 60, undefined, undefined, 'wheel');
       if (r.big) { this.fx.big(); this.toast.show('wheel.jackpot'); } else { this.fx.win(); this.toast.show('wheel.coins', { n: r.coins }); }
     }
-    if (r.hint) { this.wallet.useCard('hintCards', 1); this.fx.win(); this.toast.show('wheel.hint'); }
-    if (r.ticket) { this.wallet.useCard('gachaTickets', 1); this.fx.win(); this.toast.show('wheel.ticket'); }
-    if (r.item) {
-      const itemId = pick(KUJI_PRIZES.filter(p => p.tier === 'D')).itemId;
-      const uid = this.inventory.add(itemId, 'wheel');
-      await this.results.show({ items: [{ itemId, uid }] });
-    }
+    if (r.hint) { this.fx.win(); this.toast.show('wheel.hint'); }
+    if (r.ticket) { this.fx.win(); this.toast.show('wheel.ticket'); }
+    if (res.item) { await this.results.show({ items: [res.item] }); }
     if (r.again) { this.toast.show('wheel.respin'); setTimeout(() => void this.spin(true), 700); }
   }
 

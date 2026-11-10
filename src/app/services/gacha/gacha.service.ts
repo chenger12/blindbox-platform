@@ -1,35 +1,31 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { GachaEntry } from '../../models/catalog/catalog.model';
-import { GACHA_PITY, GACHA_POOL } from '../../utils/catalog.data';
-import { pick, weightedPick } from '../../utils/random.util';
-import { StorageService } from '../storage/storage.service';
+import { GachaSpinResult, GachaStateView } from '../../models/api/api.model';
+import { isRareTier } from '../../utils/game-rules.util';
+import { ApiService } from '../api/api.service';
 
-const KEY = 'mb_gacha';
-
+/** Client for /api/games/gacha. */
 @Injectable({ providedIn: 'root' })
 export class GachaService {
-  readonly pity$: BehaviorSubject<number>;
+  readonly pity$ = new BehaviorSubject<number>(0);
 
-  constructor(private readonly storage: StorageService) {
-    this.pity$ = new BehaviorSubject<number>(this.storage.get<number>(KEY, 0) ?? 0);
-  }
+  constructor(private readonly api: ApiService) {}
 
   get pity(): number { return this.pity$.value; }
 
   static isRare(tier: string | undefined): boolean {
-    return tier === 'SR' || tier === 'SECRET' || tier === 'A' || tier === 'B' || tier === 'LAST';
+    return isRareTier(tier);
   }
 
-  roll(trial: boolean): GachaEntry {
-    const entry = !trial && this.pity >= GACHA_PITY - 1
-      ? pick(GACHA_POOL.filter(x => x.tier === 'SR'))
-      : weightedPick(GACHA_POOL);
-    if (!trial) {
-      const next = GachaService.isRare(entry.tier) ? 0 : this.pity + 1;
-      this.storage.set(KEY, next);
-      this.pity$.next(next);
-    }
-    return entry;
+  async load(): Promise<void> {
+    const s = await this.api.game<GachaStateView>('gacha', 'state');
+    if (s) { this.pity$.next(s.pity); }
+  }
+
+  /** The server rolls every capsule up front; the page then animates them. Winnings held until api.commit(). */
+  async spin(count: 1 | 5, trial: boolean): Promise<GachaSpinResult | null> {
+    const r = await this.api.game<GachaSpinResult>('gacha', 'spin', { count, trial }, { hold: true });
+    if (r && !trial) { this.pity$.next(r.pity); }
+    return r;
   }
 }

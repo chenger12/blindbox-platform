@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
-import { BoxDef, ItemDef, RarityKey, WeightedBox } from '../../models/catalog/catalog.model';
-import { BOX_RTP, BOXES, ITEMS } from '../../utils/catalog.data';
+import { ItemDef, RarityKey, WeightedBox } from '../../models/catalog/catalog.model';
+import { ITEMS } from '../../utils/catalog.data';
+import { rollBox, WEIGHTED_BOXES } from '../../utils/game-rules.util';
 import { I18nService } from '../i18n/i18n.service';
 
 export const RARITIES: Array<{ key: RarityKey; max: number }> = [
@@ -11,7 +12,7 @@ export const RARITIES: Array<{ key: RarityKey; max: number }> = [
 @Injectable({ providedIn: 'root' })
 export class CatalogService {
   readonly items = new Map<string, ItemDef>(ITEMS.map(i => [i.id, i]));
-  readonly boxes: WeightedBox[] = BOXES.map(b => this.weigh(b));
+  readonly boxes: WeightedBox[] = WEIGHTED_BOXES;
 
   constructor(private readonly i18n: I18nService) {}
 
@@ -42,12 +43,7 @@ export class CatalogService {
   }
 
   roll(box: WeightedBox): ItemDef {
-    let x = Math.random() * box.totalWeight;
-    for (const w of box.weights) {
-      x -= w.weight;
-      if (x < 0) { return this.item(w.itemId); }
-    }
-    return this.item(box.weights[0].itemId);
+    return this.item(rollBox(box));
   }
 
   expectedValue(box: WeightedBox): number {
@@ -56,29 +52,5 @@ export class CatalogService {
 
   odds(box: WeightedBox, itemId: string): number {
     return (box.weights.find(w => w.itemId === itemId)?.weight ?? 0) / box.totalWeight;
-  }
-
-  /** Solves weights w = value^-a so the box returns BOX_RTP of its price on average. */
-  private weigh(b: BoxDef): WeightedBox {
-    const values = b.itemIds.map(id => this.item(id).value);
-    const target = b.price * BOX_RTP;
-    let lo = 0;
-    let hi = 12;
-    for (let k = 0; k < 60; k++) {
-      const a = (lo + hi) / 2;
-      let sw = 0;
-      let sv = 0;
-      values.forEach(v => { const w = Math.pow(v, -a); sw += w; sv += w * v; });
-      if (sv / sw > target) { lo = a; } else { hi = a; }
-    }
-    const a = (lo + hi) / 2;
-    const weights = b.itemIds.map(id => ({ itemId: id, weight: Math.pow(this.item(id).value, -a) }));
-    const topItemIds = [...b.itemIds].sort((x, y) => this.item(y).value - this.item(x).value);
-    return {
-      ...b, weights,
-      totalWeight: weights.reduce((s, w) => s + w.weight, 0),
-      topItemIds,
-      maxValue: this.item(topItemIds[0]).value
-    };
   }
 }
