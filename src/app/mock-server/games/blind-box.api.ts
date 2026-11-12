@@ -12,13 +12,18 @@ const EAR_GROUP: Record<string, string> = { cat: 'pointy', bear: 'round', bunny:
 const earOf = (itemId: string): string => EAR_GROUP[CHARACTERS[itemDef(itemId).charId].kind];
 
 function makeCase(prevNo: number): BlindBoxState {
-  const ids = shuffle(BLIND_BOX_POOL);
-  if (Math.random() < (gameOdds('blindBox').secretChance ?? 0.3)) { ids[randInt(0, ids.length - 1)] = BLIND_BOX_SECRET; }
-  const slots: BlindBoxSlot[] = ids.map(itemId => ({ itemId, sold: 0, excluded: [], xray: false, shaken: false, log: [] }));
+  const slots: BlindBoxSlot[] = shuffle(BLIND_BOX_POOL).map(itemId => ({ itemId, sold: 0, excluded: [], xray: false, shaken: false, log: [] }));
+  // Bots grab a few boxes first...
   for (let i = 0, n = randInt(1, 3); i < n; i++) {
     const slot = pick(slots.filter(x => !x.sold));
     slot.sold = 2;
     slot.by = pick(BOT_NAMES);
+  }
+  // ...then the secret is placed only into a box still open to the player, so the configured
+  // chance is the chance the player can actually reach it (display == experience).
+  if (Math.random() < (gameOdds('blindBox').secretChance ?? 0.3)) {
+    const open = slots.filter(x => !x.sold);
+    if (open.length) { pick(open).itemId = BLIND_BOX_SECRET; }
   }
   return { caseNo: prevNo + 1, slots, selected: -1 };
 }
