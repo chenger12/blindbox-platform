@@ -7,3 +7,11 @@
 .ic ::ng-deep svg { width: 22px; height: 22px; }
 .nm { flex: 1; min-width: 120px; display: flex; flex-direction: column; b { font-size: 14px; } small { font-size: 11px; color: var(--admin-muted); } }
 .f { flex-direction: row; align-items: center; gap: 6px; select { height: 32px; } }
+.game-wrap { display: flex; flex-direction: column; }
+.odds-btn {
+  flex: none; height: 32px; padding: 0 12px; border-radius: 8px;
+  border: 1px solid var(--admin-line); background: var(--admin-bg);
+  color: var(--admin-ink); font: 700 12px var(--admin-font); cursor: pointer;
+}
+.odds-btn:hover { border-color: var(--color-primary, #8b5cff); }
+.odds-btn.open { background: var(--color-primary, #8b5cff); color: #fff; border-color: transparent; }

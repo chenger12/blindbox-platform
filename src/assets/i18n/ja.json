@@ -915,6 +915,52 @@
    "showFooter": "フッターを表示",
    "api": "データソース",
    "apiHelp": "このビルドはモックAPI（ブラウザ保存）に保存します。environment.apiUrl をサーバーに向け、useMockBackend をオフにすれば本番運用できます。管理画面は GET/PUT /api/site-config を呼び出します。"
+  },
+  "odds": {
+   "button": "確率",
+   "help": "このゲームの当選確率を調整します。プレイヤーに表示される確率表も同じ数値に更新されます。",
+   "segments": "ルーレット賞品",
+   "tiers": "レア度",
+   "weight": "ウェイト",
+   "chance": "確率",
+   "total": "合計",
+   "mustBe100": "各確率の合計が100%にならないと保存できません。",
+   "pity": "天井（何回でSR確定）",
+   "clawPity": "天井（何回外すと確定）",
+   "gripMin": "最低キャッチ率（位置がずれた時）",
+   "gripMax": "最高キャッチ率（中央の時）",
+   "slip": "落下する確率",
+   "returnRate": "平均還元率（価格に対して）",
+   "secretChance": "シークレット出現率",
+   "usingDefault": "デフォルト使用中",
+   "customised": "カスタム済み",
+   "reset": "デフォルトに戻す",
+   "wheel": {
+    "coins20": "+20 コイン",
+    "ticket": "ガチャ券 ×1",
+    "coins50": "+50 コイン",
+    "pin": "ミステリーピン",
+    "hint": "ヒントカード ×1",
+    "coins188": "+188 コイン",
+    "respin": "もう一回",
+    "jackpot": "+888 ジャックポット"
+   },
+   "gacha": {
+    "N": "ノーマル N",
+    "R": "レア R",
+    "SR": "スーパーレア SR",
+    "SECRET": "シークレット"
+   },
+   "kujiCounts": "各賞の数（1箱あたり）",
+   "count": "数量",
+   "perBox": "1箱の合計",
+   "kuji": {
+    "A": "A賞",
+    "B": "B賞",
+    "C": "C賞",
+    "D": "D賞",
+    "E": "E賞"
+   }
   }
  },
  "api": {

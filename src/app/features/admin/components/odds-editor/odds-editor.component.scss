@@ -1,0 +1,47 @@
+@use '../admin-tab' as *;
+
+.odds-editor {
+  width: 100%;
+  margin-top: 8px;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px dashed var(--admin-line);
+  background: var(--admin-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.odds-editor .help { margin: 0; }
+
+.weights { display: flex; flex-direction: column; gap: 4px; }
+.wrow {
+  display: grid;
+  grid-template-columns: 1fr 90px 64px;
+  align-items: center;
+  gap: 10px;
+}
+.wrow.head { font-size: 11px; font-weight: 800; color: var(--admin-muted); text-transform: uppercase; letter-spacing: .03em; }
+.wrow.head .ww, .wrow.head .wp { text-align: right; }
+.wl { font-size: 13px; font-weight: 600; color: var(--admin-ink); }
+input.ww { width: 100%; text-align: right; }
+.wp { text-align: right; font-size: 13px; font-weight: 700; color: var(--admin-muted); font-variant-numeric: tabular-nums; }
+
+.wrow.total { margin-top: 4px; padding-top: 8px; border-top: 1px solid var(--admin-line); font-weight: 800; }
+.wrow.total .wl { font-weight: 800; }
+.wrow.total .ww { text-align: right; padding-right: 10px; }
+.wrow.total.bad { color: var(--color-error, #e5484d); }
+.wrow.total.bad .wp { color: var(--color-error, #e5484d); }
+.warn { margin: 2px 0 0; font-size: 12px; font-weight: 700; color: var(--color-error, #e5484d); }
+
+.num { flex-direction: row; align-items: center; justify-content: space-between; gap: 10px; }
+.num > span:first-child { font-size: 13px; font-weight: 600; color: var(--admin-ink); }
+.num .inp { display: inline-flex; align-items: center; gap: 4px; }
+.num .inp input { width: 96px; text-align: right; }
+.num .inp i { font-style: normal; font-size: 13px; color: var(--admin-muted); }
+
+.foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.tag { font-size: 10.5px; font-weight: 800; padding: 3px 9px; border-radius: 99px; background: var(--admin-surface); color: var(--admin-muted); border: 1px solid var(--admin-line); }
+.tag.on { color: var(--color-primary, #8b5cff); border-color: currentColor; }
+.reset { font: 700 12px var(--admin-font); color: var(--admin-muted); background: none; border: 0; cursor: pointer; padding: 4px; }
+.reset:disabled { opacity: .4; cursor: default; }
+.reset:not(:disabled):hover { color: var(--admin-ink); text-decoration: underline; }

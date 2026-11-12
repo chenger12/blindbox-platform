@@ -1,8 +1,10 @@
 import { BoxOpenResult } from '../../models/api/api.model';
-import { rollBox, weightedBox } from '../../utils/game-rules.util';
-import { bad, GameApi, notFound } from '../core';
+import { rollBox, weightedBoxAt } from '../../utils/game-rules.util';
+import { bad, GameApi, gameOdds, notFound } from '../core';
 
 const STARTER = 'starter';
+/** Mystery boxes are re-weighted to the back-office return rate. */
+const tunedBox = (id: string) => weightedBoxAt(id, gameOdds('boxes').returnRate);
 
 /** /api/games/boxes — mystery boxes. */
 export const boxesApi: GameApi = {
@@ -11,7 +13,7 @@ export const boxesApi: GameApi = {
   routes: {
     /** body { boxId, count: 1-4, free?: boolean } */
     'POST open': ({ acct, body }): BoxOpenResult => {
-      const box = weightedBox(String(body?.boxId));
+      const box = tunedBox(String(body?.boxId));
       if (!box) { throw notFound('boxNotFound'); }
       const free = !!body?.free;
       const n = free ? 1 : Math.min(4, Math.max(1, Math.floor(Number(body?.count) || 1)));
@@ -31,7 +33,7 @@ export const boxesApi: GameApi = {
     },
     /** Free demo spin: shows a real roll, grants nothing. body { boxId } */
     'POST demo': ({ body }): BoxOpenResult => {
-      const box = weightedBox(String(body?.boxId));
+      const box = tunedBox(String(body?.boxId));
       if (!box) { throw notFound('boxNotFound'); }
       return { items: [{ itemId: rollBox(box) }] };
     }

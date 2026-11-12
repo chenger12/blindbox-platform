@@ -1,7 +1,9 @@
 import { ApiEnvelope } from '../models/api/api.model';
 import { GameId, SiteConfig } from '../models/theme/theme.model';
 import { accountRoutes } from './account.api';
-import { Account, ApiError, db, GameApi, Handler, Routes } from './core';
+import { Account, ApiError, GameApi, Handler, Routes, setDefaultConfig, siteConfig, SITE_CONFIG_KEY } from './core';
+
+export { SITE_CONFIG_KEY };
 import { battlesApi } from './games/battles.api';
 import { blindBoxApi } from './games/blind-box.api';
 import { boxesApi } from './games/boxes.api';
@@ -12,8 +14,6 @@ import { kujiApi } from './games/kuji.api';
 import { marketApi } from './games/market.api';
 import { swapApi } from './games/swap.api';
 import { wheelApi } from './games/wheel.api';
-
-export const SITE_CONFIG_KEY = 'mb_site_config';
 
 /** One independent API per game: /api/games/<base>/<action>. */
 export const GAME_APIS: GameApi[] = [boxesApi, kujiApi, gachaApi, blindBoxApi, clawApi, groupPullApi, battlesApi, marketApi, swapApi, wheelApi];
@@ -27,11 +27,8 @@ export interface ServerResponse { status: number; body: unknown; }
  *                                back office has switched that game off
  */
 export class MockServer {
-  /** Shipped default site config, used until the back office saves its own. */
-  private defaultConfig: SiteConfig | null = null;
-
   setDefaultConfig(c: SiteConfig | null): void {
-    this.defaultConfig = c;
+    setDefaultConfig(c);
   }
 
   handles(path: string): boolean {
@@ -72,8 +69,7 @@ export class MockServer {
 
   /** Same switch the back office "Games" tab writes. */
   private enabled(id: GameId): boolean {
-    const config = db.get<SiteConfig>(SITE_CONFIG_KEY) ?? this.defaultConfig;
-    return config?.games.find(g => g.id === id)?.enabled ?? true;
+    return siteConfig()?.games.find(g => g.id === id)?.enabled ?? true;
   }
 }
 

@@ -4,7 +4,7 @@ import { BLIND_BOX_POOL, BLIND_BOX_SECRET, BOT_NAMES } from '../../utils/catalog
 import { CHARACTERS } from '../../utils/char-art.util';
 import { BLIND_BOX_HINT_PRICE as HINT_PRICE, BLIND_BOX_XRAY_PRICE as XRAY_PRICE, blindBoxCaseCost, itemDef } from '../../utils/game-rules.util';
 import { pick, randInt, shuffle } from '../../utils/random.util';
-import { Account, bad, clone, db, GameApi } from '../core';
+import { Account, bad, clone, db, GameApi, gameOdds } from '../core';
 
 const KEY = 'mb_blind_box';
 const STYLES = [...BLIND_BOX_POOL, BLIND_BOX_SECRET];
@@ -13,7 +13,7 @@ const earOf = (itemId: string): string => EAR_GROUP[CHARACTERS[itemDef(itemId).c
 
 function makeCase(prevNo: number): BlindBoxState {
   const ids = shuffle(BLIND_BOX_POOL);
-  if (Math.random() < 0.3) { ids[randInt(0, ids.length - 1)] = BLIND_BOX_SECRET; }
+  if (Math.random() < (gameOdds('blindBox').secretChance ?? 0.3)) { ids[randInt(0, ids.length - 1)] = BLIND_BOX_SECRET; }
   const slots: BlindBoxSlot[] = ids.map(itemId => ({ itemId, sold: 0, excluded: [], xray: false, shaken: false, log: [] }));
   for (let i = 0, n = randInt(1, 3); i < n; i++) {
     const slot = pick(slots.filter(x => !x.sold));

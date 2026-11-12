@@ -8,7 +8,10 @@ import { ApiService } from '../../../../services/api/api.service';
 import { DailyService } from '../../../../services/daily/daily.service';
 import { FeedService } from '../../../../services/feed/feed.service';
 import { ResultService } from '../../../../services/result/result.service';
+import { ThemeService } from '../../../../services/theme/theme.service';
 import { ReelComponent } from '../../../../shared/components/reel/reel.component';
+import { weightedBoxAt } from '../../../../utils/game-rules.util';
+import { configOdds } from '../../../../utils/odds-defaults.util';
 import { percent, sleep } from '../../../../utils/random.util';
 
 @Component({
@@ -33,6 +36,7 @@ export class BoxDetailPageComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     readonly catalog: CatalogService,
+    private readonly theme: ThemeService,
     private readonly api: ApiService,
     private readonly daily: DailyService,
     private readonly feed: FeedService,
@@ -44,7 +48,9 @@ export class BoxDetailPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.route.paramMap.subscribe(p => {
-      const box = this.catalog.box(p.get('id') ?? '');
+      const id = p.get('id') ?? '';
+      // Re-weight the box at the back-office return rate so the odds shown match what the server rolls.
+      const box = weightedBoxAt(id, configOdds(this.theme.config, 'boxes').returnRate) ?? this.catalog.box(id);
       if (!box) { void this.router.navigate(['/boxes']); return; }
       this.box = box;
       this.free = box.id === 'starter' && this.daily.freeBoxReady;

@@ -59,7 +59,10 @@ export class AdminDashboardPageComponent implements OnInit, OnDestroy {
 
   value(): SiteConfig {
     const v = this.form.getRawValue();
-    return ThemeService.normalize({ ...v, games: v.games.map((g, i) => ({ ...g, order: i + 1 })) });
+    return ThemeService.normalize({
+      ...v,
+      games: v.games.map(({ odds, ...g }, i) => odds ? { ...g, order: i + 1, odds } : { ...g, order: i + 1 })
+    });
   }
 
   setLang(code: string): void {

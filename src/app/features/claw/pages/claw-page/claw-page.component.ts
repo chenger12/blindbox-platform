@@ -6,7 +6,8 @@ import { FxService } from '../../../../services/fx/fx.service';
 import { ResultService } from '../../../../services/result/result.service';
 import { ThemeService } from '../../../../services/theme/theme.service';
 import { ToastService } from '../../../../services/toast/toast.service';
-import { CLAW_CHARS, CLAW_PITY, CLAW_PRICE } from '../../../../utils/catalog.data';
+import { CLAW_CHARS, CLAW_PRICE } from '../../../../utils/catalog.data';
+import { configOdds } from '../../../../utils/odds-defaults.util';
 import { pick, rand } from '../../../../utils/random.util';
 
 interface Prize { x: number; y: number; vx: number; vy: number; r: number; k: string; a: number; held?: boolean; }
@@ -26,7 +27,8 @@ const TOPY = 34;
 export class ClawPageComponent implements AfterViewInit, OnDestroy {
   @ViewChild('cv', { static: true }) canvas!: ElementRef<HTMLCanvasElement>;
   readonly price = CLAW_PRICE;
-  readonly pityMax = CLAW_PITY;
+  /** Pity shown in the UI: the back-office value (defaults to 8). Set in the constructor. */
+  pityMax = 8;
   timeLeft = 15;
   message: { key: string; params?: Record<string, number>; retry: boolean } | null = { key: 'claw.insert', retry: false };
   holdDir = 0;
@@ -59,7 +61,9 @@ export class ClawPageComponent implements AfterViewInit, OnDestroy {
     private readonly results: ResultService,
     private readonly toast: ToastService,
     private readonly zone: NgZone
-  ) {}
+  ) {
+    this.pityMax = configOdds(this.theme.config, 'claw').pity ?? 8;
+  }
 
   get playing(): boolean { return this.st !== 'off'; }
 
@@ -267,7 +271,7 @@ export class ClawPageComponent implements AfterViewInit, OnDestroy {
       await this.finishPlay(null);
       this.api.commit();
       this.fx.fail();
-      const left = CLAW_PITY - this.claw.state.pity;
+      const left = this.pityMax - this.claw.state.pity;
       this.message = { key: left <= 0 ? 'claw.closePower' : 'claw.close', params: { n: left }, retry: true };
     }, 900);
   }

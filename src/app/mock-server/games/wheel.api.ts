@@ -3,7 +3,7 @@ import { WheelLog } from '../../models/game/game-state.model';
 import { KUJI_PRIZES } from '../../utils/catalog.data';
 import { WHEEL_SEGMENTS, WHEEL_SPIN_PRICE } from '../../utils/game-rules.util';
 import { pick, weightedPick } from '../../utils/random.util';
-import { Account, bad, db, GameApi } from '../core';
+import { Account, bad, db, GameApi, gameOdds } from '../core';
 
 const KEY = 'mb_wheel';
 interface WheelStore { log: WheelLog[]; respin: boolean; }
@@ -32,9 +32,11 @@ export const wheelApi: GameApi = {
       } else {
         acct.charge(WHEEL_SPIN_PRICE);
       }
-      const seg = weightedPick(WHEEL_SEGMENTS);
-      const index = WHEEL_SEGMENTS.indexOf(seg);
-      const r = seg.reward;
+      // Segment weights come from the back office (falling back to defaults); each slice's
+      // reward is fixed by its index, so players see and get the same odds.
+      const tuned = gameOdds('wheel').weights ?? WHEEL_SEGMENTS.map((s, i) => ({ key: String(i), labelKey: s.labelKey, weight: s.weight }));
+      const index = Number(weightedPick(tuned).key);
+      const r = WHEEL_SEGMENTS[index].reward;
       let item = null;
       if (r.coins) { acct.credit(r.coins); }
       if (r.hint) { acct.giveCard('hintCards', r.hint); }

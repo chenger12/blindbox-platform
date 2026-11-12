@@ -4,6 +4,7 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { BadgeType, GameId, StyleRegion } from '../../../../models/theme/theme.model';
 import { GameRegistryService } from '../../../../services/game-registry/game-registry.service';
 import { ConfigForm } from '../../../../utils/config-form.util';
+import { oddsSpec } from '../../../../utils/odds-defaults.util';
 import { STYLE_PRESETS, STYLE_REGIONS } from '../../../../utils/style-presets';
 
 @Component({
@@ -17,8 +18,18 @@ export class GamesTabComponent {
   readonly regions: StyleRegion[] = STYLE_REGIONS;
   readonly presets = STYLE_PRESETS;
   private readonly icons = new Map<GameId, SafeHtml>();
+  /** Id of the game whose odds panel is open, if any. */
+  openOdds: GameId | null = null;
 
   constructor(private readonly registry: GameRegistryService, private readonly sanitizer: DomSanitizer) {}
+
+  hasOdds(id: GameId): boolean {
+    return !!oddsSpec(id);
+  }
+
+  toggleOdds(id: GameId): void {
+    this.openOdds = this.openOdds === id ? null : id;
+  }
 
   get games() {
     return this.form.controls.games;

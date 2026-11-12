@@ -12,7 +12,8 @@ import { ThemeService } from '../../../../services/theme/theme.service';
 import { ToastService } from '../../../../services/toast/toast.service';
 import { WalletService } from '../../../../services/wallet/wallet.service';
 import { OddsDialogComponent, OddsDialogData } from '../../../../shared/components/odds-dialog/odds-dialog.component';
-import { GACHA_PITY, GACHA_POOL, GACHA_PRICE, GACHA_PRICE_5 } from '../../../../utils/catalog.data';
+import { GACHA_POOL, GACHA_PRICE, GACHA_PRICE_5 } from '../../../../utils/catalog.data';
+import { configOdds } from '../../../../utils/odds-defaults.util';
 import { pick, rand, sleep } from '../../../../utils/random.util';
 
 interface Capsule { x: number; y: number; vx: number; vy: number; r: number; c: string; a: number; }
@@ -28,7 +29,8 @@ const H = 238;
 export class GachaPageComponent implements AfterViewInit, OnDestroy {
   @ViewChild('cv', { static: true }) canvas!: ElementRef<HTMLCanvasElement>;
   readonly pool = GACHA_POOL;
-  readonly pityMax = GACHA_PITY;
+  /** Pity shown in the UI: the back-office value (defaults to 30). Set in the constructor. */
+  pityMax = 30;
   readonly price = GACHA_PRICE;
   readonly price5 = GACHA_PRICE_5;
   tray: TrayCap[] = [];
@@ -55,7 +57,9 @@ export class GachaPageComponent implements AfterViewInit, OnDestroy {
     private readonly feed: FeedService,
     private readonly i18n: I18nService,
     private readonly zone: NgZone
-  ) {}
+  ) {
+    this.pityMax = configOdds(this.theme.config, 'gacha').pity ?? 30;
+  }
 
   ngAfterViewInit(): void {
     const d = Math.min(2, devicePixelRatio || 1);
@@ -79,10 +83,19 @@ export class GachaPageComponent implements AfterViewInit, OnDestroy {
 
   openOdds(): void {
     const groups: Array<GachaEntry['tier']> = ['N', 'R', 'SR', 'SECRET'];
+    // Per-tier chances come from the same back-office weights the server rolls with.
+    const tuned = configOdds(this.theme.config, 'gacha').weights;
+    const total = tuned?.reduce((a, w) => a + w.weight, 0) ?? GACHA_POOL.reduce((a, p) => a + p.weight, 0);
+    const tierChance = (t: GachaEntry['tier']): number =>
+      tuned ? (tuned.find(w => w.key === t)?.weight ?? 0) : GACHA_POOL.filter(p => p.tier === t).reduce((a, p) => a + p.weight, 0);
     const data: OddsDialogData = {
       headKeys: ['gacha.oddsRarity', 'gacha.oddsStyles', 'gacha.oddsChance'],
-      rows: groups.map(t => { const ps = GACHA_POOL.filter(p => p.tier === t); return { tier: t, left: String(ps.length), odds: ps.reduce((a, p) => a + p.weight, 0).toFixed(1) + '%' }; }),
-      noteKeys: ['gacha.oddsNote'], noteParams: { n: GACHA_PITY - 1, m: GACHA_PITY }
+      rows: groups.map(t => ({
+        tier: t,
+        left: String(GACHA_POOL.filter(p => p.tier === t).length),
+        odds: (tierChance(t) / total * 100).toFixed(1) + '%'
+      })),
+      noteKeys: ['gacha.oddsNote'], noteParams: { n: this.pityMax - 1, m: this.pityMax }
     };
     this.dialogs.open(OddsDialogComponent, { title: this.i18n.t('gacha.oddsTitle'), data });
   }

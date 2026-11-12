@@ -1,14 +1,27 @@
-import { GachaEntry } from '../../models/catalog/catalog.model';
+import { GachaEntry, GachaTier } from '../../models/catalog/catalog.model';
 import { GachaSpinResult, GachaStateView } from '../../models/api/api.model';
-import { GACHA_PITY, GACHA_POOL, GACHA_PRICE, GACHA_PRICE_5 } from '../../utils/catalog.data';
+import { GACHA_POOL, GACHA_PRICE, GACHA_PRICE_5 } from '../../utils/catalog.data';
 import { isRareTier } from '../../utils/game-rules.util';
 import { pick, weightedPick } from '../../utils/random.util';
-import { bad, db, GameApi } from '../core';
+import { bad, db, GameApi, gameOdds } from '../core';
 
 const KEY = 'mb_gacha';
 
-/** One capsule from the shared pool (also used by Group Pull). */
-export const rollCapsule = (): GachaEntry => weightedPick(GACHA_POOL);
+/** Pity: guaranteed SR after this many non-rare pulls (back-office tunable). */
+const pityLimit = (): number => gameOdds('gacha').pity ?? 30;
+
+/**
+ * One capsule (also used by Group Pull). The back office sets a weight per tier
+ * (N/R/SR/SECRET); within the chosen tier each item is equally likely, scaled by
+ * its own pool weight, so the per-tier odds players see are the ones used here.
+ */
+export const rollCapsule = (): GachaEntry => {
+  const tierWeights = gameOdds('gacha').weights;
+  if (!tierWeights?.length) { return weightedPick(GACHA_POOL); }
+  const tier = weightedPick(tierWeights).key as GachaTier;
+  const inTier = GACHA_POOL.filter(e => e.tier === tier);
+  return inTier.length ? weightedPick(inTier) : weightedPick(GACHA_POOL);
+};
 
 /** /api/games/gacha — capsule machine with a pity counter. */
 export const gachaApi: GameApi = {
@@ -29,9 +42,10 @@ export const gachaApi: GameApi = {
       const ticketUsed = count === 1 && acct.payWithCard('gachaTickets');
       if (!ticketUsed) { acct.charge(price); }
 
+      const pityMax = pityLimit();
       const entries: GachaEntry[] = [];
       for (let i = 0; i < count; i++) {
-        const e = pity >= GACHA_PITY - 1 ? pick(GACHA_POOL.filter(x => x.tier === 'SR')) : rollCapsule();
+        const e = pity >= pityMax - 1 ? pick(GACHA_POOL.filter(x => x.tier === 'SR')) : rollCapsule();
         pity = isRareTier(e.tier) ? 0 : pity + 1;
         entries.push(e);
       }

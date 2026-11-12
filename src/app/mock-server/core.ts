@@ -1,9 +1,12 @@
 import { AccountSnapshot } from '../models/api/api.model';
-import { GameId } from '../models/theme/theme.model';
+import { GameId, GameOdds, SiteConfig } from '../models/theme/theme.model';
 import { DailyState, InventoryEntry, ItemSource, LockReason, ValuePoint, WalletState } from '../models/user/user.model';
 import { STARTING_COINS } from '../utils/catalog.data';
 import { itemValue, levelNeed } from '../utils/game-rules.util';
+import { effectiveOdds } from '../utils/odds-defaults.util';
 import { todayKey } from '../utils/random.util';
+
+export const SITE_CONFIG_KEY = 'mb_site_config';
 
 /**
  * In-browser stand-in for the game server. Everything under src/app/mock-server is
@@ -35,6 +38,22 @@ export const db = {
 };
 
 export const clone = <T>(x: T): T => structuredClone(x);
+
+// ---------------------------------------------------------------------------
+// Site config + per-game odds
+// ---------------------------------------------------------------------------
+
+/** Shipped default config, used until the back office saves its own. Set at boot. */
+let defaultConfig: SiteConfig | null = null;
+export const setDefaultConfig = (c: SiteConfig | null): void => { defaultConfig = c; };
+
+export const siteConfig = (): SiteConfig | null => db.get<SiteConfig>(SITE_CONFIG_KEY) ?? defaultConfig;
+
+/** The odds in force for a game: back-office overrides merged over built-in defaults. */
+export function gameOdds(id: GameId): GameOdds {
+  const saved = siteConfig()?.games.find(g => g.id === id)?.odds;
+  return effectiveOdds(id, saved);
+}
 
 // ---------------------------------------------------------------------------
 // Account: wallet + inventory + daily progress

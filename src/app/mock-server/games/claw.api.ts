@@ -1,7 +1,7 @@
 import { ClawFinishResult, ClawGrabResult, ClawStartResult, ClawStateView } from '../../models/api/api.model';
-import { CLAW_CHARS, CLAW_PITY, CLAW_PRICE } from '../../utils/catalog.data';
+import { CLAW_CHARS, CLAW_PRICE } from '../../utils/catalog.data';
 import { uid } from '../../utils/random.util';
-import { bad, db, GameApi } from '../core';
+import { bad, db, GameApi, gameOdds } from '../core';
 
 const KEY = 'mb_claw';
 /** The claw's grip is decided here; the page only animates it. */
@@ -28,7 +28,8 @@ export const clawApi: GameApi = {
       acct.charge(CLAW_PRICE);
       acct.track('games');
       s.plays++;
-      s.play = { id: uid('c'), strong: s.pity >= CLAW_PITY, grabbed: false, canWin: false };
+      const pity = gameOdds('claw').pity ?? 8;
+      s.play = { id: uid('c'), strong: s.pity >= pity, grabbed: false, canWin: false };
       db.set(KEY, s);
       return { playId: s.play.id, strong: s.play.strong, state: view(s) };
     },
@@ -38,9 +39,12 @@ export const clawApi: GameApi = {
       const s = load();
       const play = current(s, body?.playId);
       if (play.grabbed) { throw bad('alreadyGrabbed'); }
+      const o = gameOdds('claw');
+      const min = o.gripMin ?? 0.22;
+      const max = o.gripMax ?? 0.77;
       const align = Math.max(0, Math.min(1, Number(body?.align) || 0));
-      const grip = Math.random() < (play.strong ? 1 : 0.22 + 0.55 * align);
-      const slip = grip && !play.strong && Math.random() < 0.4;
+      const grip = Math.random() < (play.strong ? 1 : min + (max - min) * align);
+      const slip = grip && !play.strong && Math.random() < (o.slipChance ?? 0.4);
       play.grabbed = true;
       play.canWin = grip && !slip;
       db.set(KEY, s);

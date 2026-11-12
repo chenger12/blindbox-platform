@@ -1,15 +1,36 @@
 import { KujiPrize } from '../../models/catalog/catalog.model';
 import { KujiPullResult, KujiPullView, KujiTickResult } from '../../models/api/api.model';
 import { KujiBox, KujiState } from '../../models/game/game-state.model';
-import { BOT_NAMES, KUJI_BOX_COUNT, KUJI_LAST_ONE, KUJI_PRIZES, KUJI_TICKETS } from '../../utils/catalog.data';
+import { BOT_NAMES, KUJI_BOX_COUNT, KUJI_LAST_ONE, KUJI_PRIZES } from '../../utils/catalog.data';
+import { KujiTier } from '../../models/catalog/catalog.model';
 import { isRareTier, kujiCost } from '../../utils/game-rules.util';
 import { pick, randInt } from '../../utils/random.util';
-import { bad, clone, db, GameApi } from '../core';
+import { bad, clone, db, GameApi, gameOdds } from '../core';
 
 const KEY = 'mb_kuji';
 const LOCK_MS = 180000;
 
 export const kujiRemaining = (box: KujiBox): number => Object.values(box.remaining).reduce((a, b) => a + b, 0);
+
+/**
+ * A fresh box's ticket counts per prize. Default quantities come from the catalog; the back
+ * office can set a total per tier, which is spread as evenly as possible over that tier's prizes.
+ */
+function freshRemaining(): Record<string, number> {
+  const remaining: Record<string, number> = {};
+  KUJI_PRIZES.forEach(p => remaining[p.itemId] = p.quantity);
+  const counts = gameOdds('kuji').tierCounts;
+  if (!counts?.length) { return remaining; }
+  for (const { key, weight } of counts) {
+    const ids = KUJI_PRIZES.filter(p => p.tier === (key as KujiTier)).map(p => p.itemId);
+    if (!ids.length) { continue; }
+    const total = Math.max(0, Math.round(weight));
+    const base = Math.floor(total / ids.length);
+    let extra = total - base * ids.length;
+    ids.forEach(id => { remaining[id] = base + (extra-- > 0 ? 1 : 0); });
+  }
+  return remaining;
+}
 
 function drawFrom(box: KujiBox, commit: boolean): KujiPrize | null {
   const rem = kujiRemaining(box);
@@ -27,16 +48,15 @@ function drawFrom(box: KujiBox, commit: boolean): KujiPrize | null {
 
 function fresh(): KujiState {
   const pre = [17, 52, 3, 74, 38, 80];
+  const total = Object.values(freshRemaining()).reduce((a, b) => a + b, 0);
   const boxes: KujiBox[] = Array.from({ length: KUJI_BOX_COUNT }, (_, i) => {
-    const remaining: Record<string, number> = {};
-    KUJI_PRIZES.forEach(p => remaining[p.itemId] = p.quantity);
-    const box: KujiBox = { no: i + 1, remaining, log: [], lastOneBy: null };
-    const take = Math.min(pre[i] ?? 0, KUJI_TICKETS);
+    const box: KujiBox = { no: i + 1, remaining: freshRemaining(), log: [], lastOneBy: null };
+    const take = Math.min(pre[i] ?? 0, total);
     for (let j = 0; j < take; j++) {
       const p = drawFrom(box, true);
       if (p) { box.log.unshift({ user: pick(BOT_NAMES), itemId: p.itemId, tier: p.tier, at: Date.now() - randInt(1, 600) * 60000 }); }
     }
-    if (take >= KUJI_TICKETS) { box.lastOneBy = pick(BOT_NAMES); }
+    if (take >= total) { box.lastOneBy = pick(BOT_NAMES); }
     box.log = box.log.slice(0, 30);
     return box;
   });

@@ -72,6 +72,41 @@ export interface GameConfig {
   order: number;
   badge: BadgeType;
   styleOverride: StyleId | null;
+  /**
+   * Optional back-office odds tuning. When absent the game uses its built-in defaults.
+   * The in-browser server reads these to decide outcomes, and the player-facing odds
+   * tables read the same numbers, so what players see always matches what they get.
+   */
+  odds?: GameOdds;
+}
+
+/** A labelled weight row in a game's odds table (e.g. one wheel segment or one gacha tier). */
+export interface OddsEntry {
+  /** Stable key identifying the slice (segment index, tier name, ...). */
+  key: string;
+  /** i18n key for the label shown in the back office and the player odds table. */
+  labelKey: string;
+  /** Relative weight; the UI also shows each as a percentage of the total. */
+  weight: number;
+}
+
+/** Per-game tunable odds. Every field is optional so a game only stores what it tunes. */
+export interface GameOdds {
+  /** Weighted slices that should sum to 100% (wheel segments, gacha tiers, ...). */
+  weights?: OddsEntry[];
+  /** Ichiban Kuji: how many tickets each tier has in a box (quantity, not a percentage). */
+  tierCounts?: OddsEntry[];
+  /** Pity counter: a guaranteed good outcome after this many misses. */
+  pity?: number;
+  /** Claw grip chance range, 0-1 (min when poorly aligned, max when centred). */
+  gripMin?: number;
+  gripMax?: number;
+  /** Claw: chance a gripped prize slips, 0-1. */
+  slipChance?: number;
+  /** Mystery boxes: average return as a fraction of price (RTP). */
+  returnRate?: number;
+  /** Blind box: chance a case contains the secret style, 0-1. */
+  secretChance?: number;
 }
 
 export interface SiteConfig {

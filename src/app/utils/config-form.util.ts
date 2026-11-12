@@ -1,6 +1,6 @@
 import { FormArray, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import {
-  BadgeType, ButtonStyle, DesktopNav, GameConfig, GameId, HomeSectionId, LangCode, NavItemId, NavPosition, SiteConfig, StyleId, TemplateType
+  BadgeType, ButtonStyle, DesktopNav, GameConfig, GameId, GameOdds, HomeSectionId, LangCode, NavItemId, NavPosition, SiteConfig, StyleId, TemplateType
 } from '../models/theme/theme.model';
 
 export type GameForm = FormGroup<{
@@ -9,6 +9,7 @@ export type GameForm = FormGroup<{
   order: FormControl<number>;
   badge: FormControl<BadgeType>;
   styleOverride: FormControl<StyleId | null>;
+  odds: FormControl<GameOdds | null>;
 }>;
 
 /** Builds the back-office form that mirrors SiteConfig one-to-one. */
@@ -54,7 +55,8 @@ export function gameGroup(fb: FormBuilder, g: GameConfig): GameForm {
     enabled: n.control(g.enabled),
     order: n.control(g.order),
     badge: n.control<BadgeType>(g.badge),
-    styleOverride: new FormControl<StyleId | null>(g.styleOverride)
+    styleOverride: new FormControl<StyleId | null>(g.styleOverride),
+    odds: new FormControl<GameOdds | null>(g.odds ?? null)
   });
 }
 

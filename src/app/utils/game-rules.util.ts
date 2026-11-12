@@ -15,10 +15,10 @@ export const itemValue = (id: string): number => itemDef(id).value;
 export const isRareTier = (tier: string | undefined): boolean =>
   tier === 'SR' || tier === 'SECRET' || tier === 'A' || tier === 'B' || tier === 'LAST';
 
-/** Solves weights w = value^-a so the box returns BOX_RTP of its price on average. */
-export function weighBox(b: BoxDef): WeightedBox {
+/** Solves weights w = value^-a so the box returns `rtp` of its price on average (default BOX_RTP). */
+export function weighBox(b: BoxDef, rtp = BOX_RTP): WeightedBox {
   const values = b.itemIds.map(itemValue);
-  const target = b.price * BOX_RTP;
+  const target = b.price * rtp;
   let lo = 0;
   let hi = 12;
   for (let k = 0; k < 60; k++) {
@@ -39,8 +39,15 @@ export function weighBox(b: BoxDef): WeightedBox {
   };
 }
 
-export const WEIGHTED_BOXES: WeightedBox[] = BOXES.map(weighBox);
+export const WEIGHTED_BOXES: WeightedBox[] = BOXES.map(b => weighBox(b));
 export const weightedBox = (id: string): WeightedBox | undefined => WEIGHTED_BOXES.find(b => b.id === id);
+
+/** A box re-weighted at a custom return rate; defaults to the standard weighting. */
+export function weightedBoxAt(id: string, rtp?: number): WeightedBox | undefined {
+  const base = WEIGHTED_BOXES.find(b => b.id === id);
+  if (!base || rtp === undefined || Math.abs(rtp - BOX_RTP) < 1e-4) { return base; }
+  return weighBox(base, rtp);
+}
 
 export function rollBox(box: WeightedBox): string {
   let x = Math.random() * box.totalWeight;

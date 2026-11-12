@@ -915,6 +915,52 @@
    "showFooter": "Show footer",
    "api": "Data source",
    "apiHelp": "This build saves to a mock API (browser storage). Point environment.apiUrl at your server and turn off useMockBackend to go live — the BO calls GET/PUT /api/site-config."
+  },
+  "odds": {
+   "button": "Odds",
+   "help": "Tune this game's win chances. The odds table players see updates to match.",
+   "segments": "Wheel prizes",
+   "tiers": "Rarity",
+   "weight": "Weight",
+   "chance": "Chance",
+   "total": "Total",
+   "mustBe100": "The chances must add up to 100% before you can save.",
+   "pity": "Pity (guaranteed SR after N pulls)",
+   "clawPity": "Pity (guaranteed grab after N misses)",
+   "gripMin": "Lowest grab rate (off-centre)",
+   "gripMax": "Highest grab rate (centred)",
+   "slip": "Slip chance",
+   "returnRate": "Average return (of price)",
+   "secretChance": "Secret style chance",
+   "usingDefault": "Using default",
+   "customised": "Customised",
+   "reset": "Reset to default",
+   "wheel": {
+    "coins20": "+20 coins",
+    "ticket": "Gacha ticket ×1",
+    "coins50": "+50 coins",
+    "pin": "Mystery pin",
+    "hint": "Hint card ×1",
+    "coins188": "+188 coins",
+    "respin": "Spin again",
+    "jackpot": "+888 jackpot"
+   },
+   "gacha": {
+    "N": "Normal N",
+    "R": "Rare R",
+    "SR": "Super rare SR",
+    "SECRET": "Secret"
+   },
+   "kujiCounts": "Tickets per tier (one box)",
+   "count": "Count",
+   "perBox": "Per box",
+   "kuji": {
+    "A": "Tier A",
+    "B": "Tier B",
+    "C": "Tier C",
+    "D": "Tier D",
+    "E": "Tier E"
+   }
   }
  },
  "api": {

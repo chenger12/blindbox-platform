@@ -10,6 +10,7 @@ import { BrandTabComponent } from './components/brand-tab/brand-tab.component';
 import { GamesTabComponent } from './components/games-tab/games-tab.component';
 import { LayoutTabComponent } from './components/layout-tab/layout-tab.component';
 import { NavTabComponent } from './components/nav-tab/nav-tab.component';
+import { OddsEditorComponent } from './components/odds-editor/odds-editor.component';
 import { ThemeTabComponent } from './components/theme-tab/theme-tab.component';
 import { AdminDashboardPageComponent } from './pages/admin-dashboard-page/admin-dashboard-page.component';
 import { AdminLoginPageComponent } from './pages/admin-login-page/admin-login-page.component';
@@ -17,7 +18,7 @@ import { AdminLoginPageComponent } from './pages/admin-login-page/admin-login-pa
 @NgModule({
   declarations: [
     AdminLoginPageComponent, AdminDashboardPageComponent,
-    ThemeTabComponent, GamesTabComponent, LayoutTabComponent, NavTabComponent, BrandTabComponent
+    ThemeTabComponent, GamesTabComponent, LayoutTabComponent, NavTabComponent, BrandTabComponent, OddsEditorComponent
   ],
   imports: [SharedModule, AdminRoutingModule, DragDropModule, MatTabsModule, MatSlideToggleModule, MatButtonModule, MatButtonToggleModule]
 })

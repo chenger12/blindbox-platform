@@ -1,0 +1,61 @@
+<div class="odds-editor">
+  <p class="help">{{ 'admin.odds.help' | t }}</p>
+
+  <!-- Weighted slices (wheel segments, gacha tiers) -->
+  <ng-container *ngFor="let f of fields">
+    <div *ngIf="f.kind === 'weights'" class="weights">
+      <div class="wrow head">
+        <span class="wl">{{ f.labelKey | t }}</span>
+        <span class="ww">{{ 'admin.odds.weight' | t }}</span>
+        <span class="wp">{{ 'admin.odds.chance' | t }}</span>
+      </div>
+      <div class="wrow" *ngFor="let w of weights">
+        <span class="wl">{{ w.labelKey | t }}</span>
+        <input class="ww" type="number" min="0" step="1" [value]="w.weight"
+               (input)="setWeight(w.key, $any($event.target).value)" />
+        <span class="wp">{{ percentOf(w) }}</span>
+      </div>
+      <div class="wrow total" [class.bad]="!weightsBalanced">
+        <span class="wl">{{ 'admin.odds.total' | t }}</span>
+        <span class="ww">{{ weightTotal() }}</span>
+        <span class="wp">{{ (weightTotal()).toFixed(0) }}%</span>
+      </div>
+      <p class="warn" *ngIf="!weightsBalanced">{{ 'admin.odds.mustBe100' | t }}</p>
+    </div>
+
+    <!-- Ichiban Kuji ticket counts per tier (quantities) -->
+    <div *ngIf="f.kind === 'tierCounts'" class="weights">
+      <div class="wrow head">
+        <span class="wl">{{ f.labelKey | t }}</span>
+        <span class="ww">{{ 'admin.odds.count' | t }}</span>
+        <span class="wp">{{ 'admin.odds.chance' | t }}</span>
+      </div>
+      <div class="wrow" *ngFor="let w of tierCounts">
+        <span class="wl">{{ w.labelKey | t }}</span>
+        <input class="ww" type="number" min="0" step="1" [value]="w.weight"
+               (input)="setCount(w.key, $any($event.target).value)" />
+        <span class="wp">{{ countPercentOf(w) }}</span>
+      </div>
+      <div class="wrow total">
+        <span class="wl">{{ 'admin.odds.perBox' | t }}</span>
+        <span class="ww">{{ countTotal() }}</span>
+        <span class="wp">100%</span>
+      </div>
+    </div>
+
+    <!-- Single number fields (pity, grip %, return rate) -->
+    <label *ngIf="f.kind !== 'weights'" class="num">
+      <span>{{ f.labelKey | t }}</span>
+      <span class="inp">
+        <input type="number" [min]="f.min ?? 0" [max]="f.max ?? null" step="1"
+               [value]="number(f)" (input)="setNumber(f, $any($event.target).value)" />
+        <i *ngIf="f.percent">%</i>
+      </span>
+    </label>
+  </ng-container>
+
+  <div class="foot">
+    <span class="tag" [class.on]="!isDefault">{{ (isDefault ? 'admin.odds.usingDefault' : 'admin.odds.customised') | t }}</span>
+    <button type="button" class="reset" [disabled]="isDefault" (click)="reset()">{{ 'admin.odds.reset' | t }}</button>
+  </div>
+</div>

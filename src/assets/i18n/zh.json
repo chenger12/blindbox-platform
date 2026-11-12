@@ -915,6 +915,52 @@
    "showFooter": "显示页脚",
    "api": "数据来源",
    "apiHelp": "当前版本保存到模拟 API（浏览器存储）。把 environment.apiUrl 指向你的服务器并关闭 useMockBackend 即可上线——后台调用的是 GET/PUT /api/site-config。"
+  },
+  "odds": {
+   "button": "概率",
+   "help": "调整这个玩法的中奖概率。调整后，前台给玩家看的概率表会显示同样的数字。",
+   "segments": "转盘奖品",
+   "tiers": "稀有度",
+   "weight": "权重",
+   "chance": "概率",
+   "total": "合计",
+   "mustBe100": "各项概率合计必须等于 100% 才能保存。",
+   "pity": "保底次数（第几抽必出 SR）",
+   "clawPity": "保底次数（几次不中后必中）",
+   "gripMin": "最低抓中率（没对准时）",
+   "gripMax": "最高抓中率（对准时）",
+   "slip": "中途掉落率",
+   "returnRate": "平均返还率（占售价）",
+   "secretChance": "出现隐藏款的概率",
+   "usingDefault": "使用默认值",
+   "customised": "已自定义",
+   "reset": "恢复默认",
+   "wheel": {
+    "coins20": "+20 金币",
+    "ticket": "扭蛋券 ×1",
+    "coins50": "+50 金币",
+    "pin": "神秘徽章",
+    "hint": "提示卡 ×1",
+    "coins188": "+188 金币",
+    "respin": "再转一次",
+    "jackpot": "+888 头奖"
+   },
+   "gacha": {
+    "N": "普通 N",
+    "R": "稀有 R",
+    "SR": "超稀有 SR",
+    "SECRET": "隐藏款"
+   },
+   "kujiCounts": "每档奖品数量（一箱内）",
+   "count": "数量",
+   "perBox": "每箱合计",
+   "kuji": {
+    "A": "A 赏",
+    "B": "B 赏",
+    "C": "C 赏",
+    "D": "D 赏",
+    "E": "E 赏"
+   }
   }
  },
  "api": {
